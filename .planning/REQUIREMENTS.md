@@ -35,10 +35,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Configuration
 
-- [ ] **CFG-01**: All non-secret settings in escalate.config.json — escalation rules, channel preferences, timeout values
+- [x] **CFG-01**: All non-secret settings in escalate.config.json — escalation rules, channel preferences, timeout values
 - [ ] **CFG-02**: Escalation triggers configurable per event type with policies: always escalate, never escalate, or conditional (pattern-based)
 - [ ] **CFG-03**: Startup validation on SessionStart — verify Slack credentials, ping channel with "Escalate online" message, fail loudly if misconfigured
-- [ ] **CFG-04**: All secrets via environment variables (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) — no hardcoded credentials
+- [x] **CFG-04**: All secrets via environment variables (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) — no hardcoded credentials
 
 ### Intelligence
 
@@ -121,10 +121,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IPC-04      | Phase 4 | Pending  |
 | IPC-05      | Phase 2 | Pending  |
 | IPC-06      | Phase 4 | Pending  |
-| CFG-01      | Phase 1 | Pending  |
+| CFG-01      | Phase 1 | Complete |
 | CFG-02      | Phase 5 | Pending  |
 | CFG-03      | Phase 3 | Pending  |
-| CFG-04      | Phase 1 | Pending  |
+| CFG-04      | Phase 1 | Complete |
 | INTL-01     | Phase 5 | Pending  |
 | INTL-02     | Phase 5 | Pending  |
 | INTL-03     | Phase 5 | Pending  |

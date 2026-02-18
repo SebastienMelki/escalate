@@ -13,7 +13,7 @@ Escalate is built bottom-up along the dependency graph: shared types and ESM fou
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - ESM project skeleton, shared types, config schema, MessagingAdapter interface, strict TypeScript linting
+- [x] **Phase 1: Foundation** - ESM project skeleton, shared types, config schema, MessagingAdapter interface, strict TypeScript linting
 - [ ] **Phase 2: State Store and IPC Bridge** - SQLite state store for pending escalations, MCP server with HTTP bridge endpoint, polling-based response resolution
 - [ ] **Phase 3: Slack Adapter** - Socket Mode connection, Block Kit messages with interactive buttons, threaded replies, startup validation
 - [ ] **Phase 4: Hook Scripts and Escalation Loop** - Thin hook dispatchers for all four event types, full end-to-end escalation round-trip, configurable timeouts
@@ -40,7 +40,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 
 - [x] 01-01-PLAN.md — ESM project skeleton, strict tooling, core types, MessagingAdapter interface, Result type
-- [ ] 01-02-PLAN.md — Config schema validation and loading with TDD (Zod 4, env var secrets)
+- [x] 01-02-PLAN.md — Config schema validation and loading with TDD (Zod 4, env var secrets)
 
 ### Phase 2: State Store and IPC Bridge
 
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase                               | Plans Complete | Status      | Completed |
 | ----------------------------------- | -------------- | ----------- | --------- |
-| 1. Foundation                       | 0/2            | Not started | -         |
+| 1. Foundation                       | 2/2            | Complete    | 2026-02-18 |
 | 2. State Store and IPC Bridge       | 0/2            | Not started | -         |
 | 3. Slack Adapter                    | 0/3            | Not started | -         |
 | 4. Hook Scripts and Escalation Loop | 0/3            | Not started | -         |
