@@ -1,0 +1,5 @@
+{
+  "name": "escalate",
+  "version": "0.1.0",
+  "description": "Smart escalation bridge between Claude Code and messaging platforms"
+}
