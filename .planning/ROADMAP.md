@@ -41,7 +41,7 @@ Plans:
 
 - [x] 01-01-PLAN.md — ESM project skeleton, strict tooling, core types, MessagingAdapter interface, Result type
 - [x] 01-02-PLAN.md — Config schema validation and loading with TDD (Zod 4, env var secrets)
-- [ ] 01-03-PLAN.md — Gap closure: .prettierignore and PLAT-01 requirement reassignment to Phase 2
+- [x] 01-03-PLAN.md — Gap closure: .prettierignore and PLAT-01 requirement reassignment to Phase 2
 
 ### Phase 2: State Store and IPC Bridge
 
@@ -161,7 +161,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase                               | Plans Complete | Status      | Completed |
 | ----------------------------------- | -------------- | ----------- | --------- |
-| 1. Foundation                       | 2/3            | In Progress | -         |
+| 1. Foundation                       | 3/3            | Complete    | 2026-02-18 |
 | 2. State Store and IPC Bridge       | 0/2            | Not started | -         |
 | 3. Slack Adapter                    | 0/3            | Not started | -         |
 | 4. Hook Scripts and Escalation Loop | 0/3            | Not started | -         |
