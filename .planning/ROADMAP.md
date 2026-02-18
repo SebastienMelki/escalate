@@ -27,7 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Goal**: A working ESM TypeScript project with shared types, config loading, and strict linting that all downstream phases build on
 **Depends on**: Nothing (first phase)
-**Requirements**: PLAT-01, PLAT-02, PLAT-06, CFG-01, CFG-04
+**Requirements**: PLAT-02, PLAT-06, CFG-01, CFG-04
 **Success Criteria** (what must be TRUE):
 
 1. Running `npm run build` produces ESM output via tsup without errors
@@ -35,18 +35,19 @@ Decimal phases appear between their surrounding integers in numeric order.
 3. ESLint with @typescript-eslint/strict and no-any rules rejects unsafe code
 4. The MessagingAdapter interface is defined with sendEscalation, waitForResponse, sendFollowUp, and isConnected methods
 5. An escalate.config.json file can be loaded and validated against a Zod schema, with all secrets read from environment variables
-   **Plans**: 2 plans
+   **Plans**: 3 plans
 
 Plans:
 
 - [x] 01-01-PLAN.md — ESM project skeleton, strict tooling, core types, MessagingAdapter interface, Result type
 - [x] 01-02-PLAN.md — Config schema validation and loading with TDD (Zod 4, env var secrets)
+- [ ] 01-03-PLAN.md — Gap closure: .prettierignore and PLAT-01 requirement reassignment to Phase 2
 
 ### Phase 2: State Store and IPC Bridge
 
 **Goal**: Hook scripts and the MCP server can exchange escalation state through SQLite, with the MCP server exposing a local HTTP endpoint for hook communication
 **Depends on**: Phase 1
-**Requirements**: IPC-01, IPC-02, IPC-03, IPC-05
+**Requirements**: PLAT-01, IPC-01, IPC-02, IPC-03, IPC-05
 **Success Criteria** (what must be TRUE):
 
 1. The MCP server starts via stdio transport and simultaneously exposes an HTTP endpoint on a configurable port
@@ -160,7 +161,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase                               | Plans Complete | Status      | Completed |
 | ----------------------------------- | -------------- | ----------- | --------- |
-| 1. Foundation                       | 2/2            | Complete    | 2026-02-18 |
+| 1. Foundation                       | 2/3            | In Progress | -         |
 | 2. State Store and IPC Bridge       | 0/2            | Not started | -         |
 | 3. Slack Adapter                    | 0/3            | Not started | -         |
 | 4. Hook Scripts and Escalation Loop | 0/3            | Not started | -         |
