@@ -104,13 +104,46 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | Populated during roadmap creation |
+| HOOK-01 | Phase 4 | Pending |
+| HOOK-02 | Phase 4 | Pending |
+| HOOK-03 | Phase 4 | Pending |
+| HOOK-04 | Phase 4 | Pending |
+| HOOK-05 | Phase 4 | Pending |
+| SLCK-01 | Phase 3 | Pending |
+| SLCK-02 | Phase 3 | Pending |
+| SLCK-03 | Phase 3 | Pending |
+| SLCK-04 | Phase 3 | Pending |
+| SLCK-05 | Phase 3 | Pending |
+| SLCK-06 | Phase 3 | Pending |
+| IPC-01 | Phase 2 | Pending |
+| IPC-02 | Phase 2 | Pending |
+| IPC-03 | Phase 2 | Pending |
+| IPC-04 | Phase 4 | Pending |
+| IPC-05 | Phase 2 | Pending |
+| IPC-06 | Phase 4 | Pending |
+| CFG-01 | Phase 1 | Pending |
+| CFG-02 | Phase 5 | Pending |
+| CFG-03 | Phase 3 | Pending |
+| CFG-04 | Phase 1 | Pending |
+| INTL-01 | Phase 5 | Pending |
+| INTL-02 | Phase 5 | Pending |
+| INTL-03 | Phase 5 | Pending |
+| INTL-04 | Phase 5 | Pending |
+| INTL-05 | Phase 5 | Pending |
+| MDIA-01 | Phase 6 | Pending |
+| MDIA-02 | Phase 6 | Pending |
+| PLAT-01 | Phase 1 | Pending |
+| PLAT-02 | Phase 1 | Pending |
+| PLAT-03 | Phase 3 | Pending |
+| PLAT-04 | Phase 7 | Pending |
+| PLAT-05 | Phase 7 | Pending |
+| PLAT-06 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30 ⚠️
+- v1 requirements: 34 total
+- Mapped to phases: 34
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-18 after initial definition*
+*Last updated: 2026-02-18 after roadmap creation*
