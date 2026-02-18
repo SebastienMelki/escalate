@@ -20,10 +20,7 @@ afterEach(() => {
 describe('loadConfig', () => {
   it('loads and validates a valid config file', () => {
     const configPath = fixtureFile('valid.json');
-    writeFileSync(
-      configPath,
-      JSON.stringify({ slack: { channelId: 'C0123456789' } }),
-    );
+    writeFileSync(configPath, JSON.stringify({ slack: { channelId: 'C0123456789' } }));
 
     const result = loadConfig(configPath);
     expect(result.success).toBe(true);
@@ -55,10 +52,7 @@ describe('loadConfig', () => {
 
   it('returns VALIDATION_FAILED for invalid schema data', () => {
     const configPath = fixtureFile('invalid-schema.json');
-    writeFileSync(
-      configPath,
-      JSON.stringify({ slack: { channelId: '' } }),
-    );
+    writeFileSync(configPath, JSON.stringify({ slack: { channelId: '' } }));
 
     const result = loadConfig(configPath);
     expect(result.success).toBe(false);

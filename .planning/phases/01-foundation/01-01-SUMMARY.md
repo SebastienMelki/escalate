@@ -16,8 +16,25 @@ affects: [01-02, 02-state-store, 03-slack-adapter, 04-hooks, 07-packaging]
 
 # Tech tracking
 tech-stack:
-  added: [typescript 5.9.3, tsup 8.5.1, eslint 10.0.0, typescript-eslint 8.56.0, prettier 3.8.1, vitest 4.0.18, zod 4.3.6, jiti 2.6.1]
-  patterns: [ESM-only project, strict TypeScript with noUncheckedIndexedAccess and exactOptionalPropertyTypes, Result type for error handling, platform-agnostic adapter interface, barrel re-exports with export type]
+  added:
+    [
+      typescript 5.9.3,
+      tsup 8.5.1,
+      eslint 10.0.0,
+      typescript-eslint 8.56.0,
+      prettier 3.8.1,
+      vitest 4.0.18,
+      zod 4.3.6,
+      jiti 2.6.1,
+    ]
+  patterns:
+    [
+      ESM-only project,
+      strict TypeScript with noUncheckedIndexedAccess and exactOptionalPropertyTypes,
+      Result type for error handling,
+      platform-agnostic adapter interface,
+      barrel re-exports with export type,
+    ]
 
 key-files:
   created:
@@ -37,17 +54,17 @@ key-files:
   modified: []
 
 key-decisions:
-  - "Used ESLint 10 defineConfig() instead of deprecated tseslint.config()"
-  - "Added jiti as dev dependency for ESLint TypeScript config file support"
-  - "Added pnpm.onlyBuiltDependencies for esbuild postinstall approval"
-  - "Used allowDefaultProject for root config files instead of adding them to tsconfig include"
+  - 'Used ESLint 10 defineConfig() instead of deprecated tseslint.config()'
+  - 'Added jiti as dev dependency for ESLint TypeScript config file support'
+  - 'Added pnpm.onlyBuiltDependencies for esbuild postinstall approval'
+  - 'Used allowDefaultProject for root config files instead of adding them to tsconfig include'
 
 patterns-established:
-  - "ESM imports use .js extensions between .ts files"
-  - "Type-only re-exports use export type (verbatimModuleSyntax)"
-  - "Optional properties use ? without | undefined (exactOptionalPropertyTypes)"
-  - "Result<T, E> for fallible operations, throw for programmer errors"
-  - "Per-domain barrel files (src/types/index.ts) with root entry (src/index.ts)"
+  - 'ESM imports use .js extensions between .ts files'
+  - 'Type-only re-exports use export type (verbatimModuleSyntax)'
+  - 'Optional properties use ? without | undefined (exactOptionalPropertyTypes)'
+  - 'Result<T, E> for fallible operations, throw for programmer errors'
+  - 'Per-domain barrel files (src/types/index.ts) with root entry (src/index.ts)'
 
 requirements-completed: [PLAT-02, PLAT-06]
 
@@ -111,6 +128,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Installed pnpm globally**
+
 - **Found during:** Task 1
 - **Issue:** pnpm was not installed on the system
 - **Fix:** Ran `npm install -g pnpm`
@@ -119,6 +137,7 @@ Each task was committed atomically:
 - **Committed in:** a6e638a (Task 1 commit)
 
 **2. [Rule 3 - Blocking] Installed jiti for ESLint TypeScript config support**
+
 - **Found during:** Task 1
 - **Issue:** ESLint 10 requires jiti library to load .ts config files, not bundled by default
 - **Fix:** `pnpm add -D jiti`
@@ -127,6 +146,7 @@ Each task was committed atomically:
 - **Committed in:** a6e638a (Task 1 commit)
 
 **3. [Rule 3 - Blocking] Approved esbuild postinstall build scripts**
+
 - **Found during:** Task 1
 - **Issue:** pnpm 10 blocks postinstall scripts by default; esbuild needs them to install platform binaries
 - **Fix:** Added `pnpm.onlyBuiltDependencies: ["esbuild"]` to package.json
@@ -135,6 +155,7 @@ Each task was committed atomically:
 - **Committed in:** a6e638a (Task 1 commit)
 
 **4. [Rule 1 - Bug] Fixed ESLint config to use defineConfig instead of deprecated tseslint.config**
+
 - **Found during:** Task 1
 - **Issue:** typescript-eslint's `config()` helper is deprecated; ESLint's strict rules catch deprecated usage as errors
 - **Fix:** Switched to `import { defineConfig } from 'eslint/config'` and adjusted config array spread
@@ -143,6 +164,7 @@ Each task was committed atomically:
 - **Committed in:** a6e638a (Task 1 commit)
 
 **5. [Rule 1 - Bug] Added ignores and allowDefaultProject for ESLint project service**
+
 - **Found during:** Task 1
 - **Issue:** ESLint tried to lint dist/ files and root config files not in tsconfig.json
 - **Fix:** Added `ignores: ['dist/**']` and `allowDefaultProject: ['*.config.ts']` config blocks
@@ -179,5 +201,6 @@ None - no external service configuration required.
 - All 5 npm scripts (typecheck, build, lint, format:check, test) exit 0
 
 ---
-*Phase: 01-foundation*
-*Completed: 2026-02-18*
+
+_Phase: 01-foundation_
+_Completed: 2026-02-18_

@@ -5,10 +5,7 @@
  * for optional fields (timeouts, escalation policies).
  */
 import { z } from 'zod';
-import {
-  DEFAULT_TIMEOUTS,
-  DEFAULT_ESCALATION_POLICIES,
-} from './defaults.js';
+import { DEFAULT_TIMEOUTS, DEFAULT_ESCALATION_POLICIES } from './defaults.js';
 
 /** Urgency level for escalation classification. */
 export const UrgencyLevelSchema = z.enum(['info', 'warning', 'critical']);
@@ -35,7 +32,9 @@ export const EventEscalationConfigSchema = z.object({
   permissionRequest: EscalationPolicySchema.default(DEFAULT_ESCALATION_POLICIES.permissionRequest),
   preToolUse: EscalationPolicySchema.default(DEFAULT_ESCALATION_POLICIES.preToolUse),
   stop: EscalationPolicySchema.default(DEFAULT_ESCALATION_POLICIES.stop),
-  postToolUseFailure: EscalationPolicySchema.default(DEFAULT_ESCALATION_POLICIES.postToolUseFailure),
+  postToolUseFailure: EscalationPolicySchema.default(
+    DEFAULT_ESCALATION_POLICIES.postToolUseFailure,
+  ),
 });
 
 /** Root configuration schema for escalate.config.json. */

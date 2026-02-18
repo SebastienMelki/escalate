@@ -13,11 +13,7 @@ import type { Result } from '../errors/result.js';
 
 /** Structured error returned by config loading operations. */
 export interface ConfigError {
-  readonly code:
-    | 'FILE_NOT_FOUND'
-    | 'INVALID_JSON'
-    | 'VALIDATION_FAILED'
-    | 'MISSING_ENV_VAR';
+  readonly code: 'FILE_NOT_FOUND' | 'INVALID_JSON' | 'VALIDATION_FAILED' | 'MISSING_ENV_VAR';
   readonly message: string;
   readonly details?: unknown;
 }
@@ -34,9 +30,7 @@ export interface ConfigSecrets {
  * @param configPath - Path to config file. Defaults to `escalate.config.json` in cwd.
  * @returns A Result containing the validated config or a ConfigError.
  */
-export function loadConfig(
-  configPath?: string,
-): Result<EscalateConfig, ConfigError> {
+export function loadConfig(configPath?: string): Result<EscalateConfig, ConfigError> {
   const resolvedPath = configPath ?? resolve(process.cwd(), 'escalate.config.json');
 
   // Check file exists
