@@ -60,15 +60,16 @@ Run GSD end-to-end autonomously, escalating to the human through their phone onl
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| Hooks + MCP server architecture | Hooks intercept Claude Code events natively; MCP server provides communication tools Claude can also use proactively | — Pending |
-| Start with Slack | Most feature-rich bot platform (Block Kit, threads, reactions, voice), user's primary platform | — Pending |
-| Adapter pattern for messaging | Enables adding Telegram, WhatsApp, GitHub without rewriting core | — Pending |
-| Claude API for media interpretation | Consistent quality, no dependency on platform-specific transcription | — Pending |
-| TypeScript/Node.js | Claude Code ecosystem compatibility, MCP server support, Slack SDK availability | — Pending |
-| Local-first, cloud-ready | Start as local MCP server, design for deployment to Cloudflare/AWS later | — Pending |
-| GitHub as a communication channel | PRs, issues, comments are part of the dev workflow — bot should be aware of both Slack and GitHub context | — Pending |
+| Decision                            | Rationale                                                                                                            | Outcome   |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------- |
+| Hooks + MCP server architecture     | Hooks intercept Claude Code events natively; MCP server provides communication tools Claude can also use proactively | — Pending |
+| Start with Slack                    | Most feature-rich bot platform (Block Kit, threads, reactions, voice), user's primary platform                       | — Pending |
+| Adapter pattern for messaging       | Enables adding Telegram, WhatsApp, GitHub without rewriting core                                                     | — Pending |
+| Claude API for media interpretation | Consistent quality, no dependency on platform-specific transcription                                                 | — Pending |
+| TypeScript/Node.js                  | Claude Code ecosystem compatibility, MCP server support, Slack SDK availability                                      | — Pending |
+| Local-first, cloud-ready            | Start as local MCP server, design for deployment to Cloudflare/AWS later                                             | — Pending |
+| GitHub as a communication channel   | PRs, issues, comments are part of the dev workflow — bot should be aware of both Slack and GitHub context            | — Pending |
 
 ---
-*Last updated: 2026-02-18 after initialization*
+
+_Last updated: 2026-02-18 after initialization_

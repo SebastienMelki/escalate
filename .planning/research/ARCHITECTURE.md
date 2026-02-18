@@ -64,18 +64,18 @@
 
 ### Component Responsibilities
 
-| Component | Responsibility | Communicates With |
-|-----------|----------------|-------------------|
-| `hooks/hooks.json` | Registers hook event listeners in Claude Code | Declares which scripts to call on which events |
-| `scripts/` (hook scripts) | Parse hook event JSON, apply escalation rules, call MCP server or return auto-decision | MCP server (HTTP), Claude Code (stdout/exit code) |
-| `servers/escalate-mcp.ts` | MCP server process — provides tools for sending escalations, waiting for responses, configuration | Messaging Core, Claude Code (via stdio/MCP protocol) |
-| `src/messaging/engine.ts` | Escalation engine — applies trigger config, decides what/when to escalate, manages pending escalations | Adapters, State Store, Claude API client |
-| `src/messaging/adapters/` | Platform adapter implementations (one per platform) | Slack/Telegram/GitHub APIs |
-| `src/messaging/state.ts` | Pending escalation state store — tracks open requests and incoming responses | Local file or SQLite |
-| `src/config/` | Escalation trigger configuration loader — what triggers escalation vs auto-handling | Read by engine and hook scripts |
-| `src/claude-client.ts` | Claude API calls for media interpretation (voice, images) | Claude API |
-| `.mcp.json` | Declares MCP server process to Claude Code | Claude Code reads at startup |
-| `.claude-plugin/plugin.json` | Plugin manifest — name, version, component paths | Claude Code reads at startup |
+| Component                    | Responsibility                                                                                         | Communicates With                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| `hooks/hooks.json`           | Registers hook event listeners in Claude Code                                                          | Declares which scripts to call on which events       |
+| `scripts/` (hook scripts)    | Parse hook event JSON, apply escalation rules, call MCP server or return auto-decision                 | MCP server (HTTP), Claude Code (stdout/exit code)    |
+| `servers/escalate-mcp.ts`    | MCP server process — provides tools for sending escalations, waiting for responses, configuration      | Messaging Core, Claude Code (via stdio/MCP protocol) |
+| `src/messaging/engine.ts`    | Escalation engine — applies trigger config, decides what/when to escalate, manages pending escalations | Adapters, State Store, Claude API client             |
+| `src/messaging/adapters/`    | Platform adapter implementations (one per platform)                                                    | Slack/Telegram/GitHub APIs                           |
+| `src/messaging/state.ts`     | Pending escalation state store — tracks open requests and incoming responses                           | Local file or SQLite                                 |
+| `src/config/`                | Escalation trigger configuration loader — what triggers escalation vs auto-handling                    | Read by engine and hook scripts                      |
+| `src/claude-client.ts`       | Claude API calls for media interpretation (voice, images)                                              | Claude API                                           |
+| `.mcp.json`                  | Declares MCP server process to Claude Code                                                             | Claude Code reads at startup                         |
+| `.claude-plugin/plugin.json` | Plugin manifest — name, version, component paths                                                       | Claude Code reads at startup                         |
 
 ---
 
@@ -141,6 +141,7 @@ escalate/
 **Trade-offs:** Requires the MCP server to be running (it always is — Claude Code starts it). Adds one HTTP round-trip for escalated events, but that's fine because escalation implies human response time anyway.
 
 **Example:**
+
 ```typescript
 // scripts/on-permission-request.ts
 import { readFileSync } from 'fs';
@@ -165,10 +166,12 @@ async function main() {
 
   // Return the decision back to Claude Code
   if (response.decision === 'deny') {
-    process.stderr.write(JSON.stringify({
-      hookSpecificOutput: { permissionDecision: 'deny' },
-      systemMessage: response.reason,
-    }));
+    process.stderr.write(
+      JSON.stringify({
+        hookSpecificOutput: { permissionDecision: 'deny' },
+        systemMessage: response.reason,
+      }),
+    );
     process.exit(2);
   }
 
@@ -189,6 +192,7 @@ main().catch(() => process.exit(0)); // never block on error
 **Why not stdio from hook scripts to MCP:** Hook scripts communicate with Claude Code via stdin/stdout. They cannot also use stdio to talk to the MCP server simultaneously. Use a local HTTP endpoint on the MCP server side.
 
 **Example — .mcp.json:**
+
 ```json
 {
   "escalate": {
@@ -213,6 +217,7 @@ main().catch(() => process.exit(0)); // never block on error
 **Trade-offs:** Minor abstraction overhead, but saves a rewrite when adding Telegram/GitHub.
 
 **Example:**
+
 ```typescript
 // src/messaging/adapters/interface.ts
 export interface MessagingAdapter {
@@ -231,17 +236,17 @@ export interface MessagingAdapter {
 
 export interface EscalationRequest {
   title: string;
-  context: string;            // What Claude was doing
-  question: string;           // What the user needs to decide
-  options?: string[];         // Button labels (if decision point)
+  context: string; // What Claude was doing
+  question: string; // What the user needs to decide
+  options?: string[]; // Button labels (if decision point)
   attachments?: Attachment[]; // Images, code snippets
   urgency: 'low' | 'medium' | 'high';
 }
 
 export interface UserResponse {
   type: 'button' | 'text' | 'voice' | 'image';
-  value: string;              // Text or interpreted content
-  rawPayload?: unknown;       // Platform-specific raw response
+  value: string; // Text or interpreted content
+  rawPayload?: unknown; // Platform-specific raw response
 }
 ```
 
@@ -254,9 +259,13 @@ export interface UserResponse {
 **Trade-offs:** Keeps the hook blocking while waiting — this is intentional. Claude Code must wait. Default timeout should be configurable (suggest 5-15 minutes).
 
 **Example:**
+
 ```typescript
 // scripts/lib/mcp-client.ts
-export async function waitForDecision(escalationId: string, timeoutMs = 10 * 60 * 1000): Promise<Decision> {
+export async function waitForDecision(
+  escalationId: string,
+  timeoutMs = 10 * 60 * 1000,
+): Promise<Decision> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const result = await callMcpTool('check_pending', { escalation_id: escalationId });
@@ -340,34 +349,34 @@ export async function waitForDecision(escalationId: string, timeoutMs = 10 * 60 
 
 ### External Services
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| Claude Code (hooks) | stdin/stdout JSON + exit codes | Synchronous; hook script must exit with decision |
-| Claude Code (MCP) | stdio transport; JSON-RPC via @modelcontextprotocol/sdk | MCP server process is long-lived |
-| Slack API | @slack/bolt Socket Mode (WebSocket); @slack/web-api | Socket Mode avoids exposing public HTTP endpoints |
-| Claude API | @anthropic-ai/sdk; messages endpoint, multimodal | For voice note transcription + image interpretation only |
-| Slack file downloads | HTTPS with Authorization: Bearer token | Files are not publicly accessible; must download with bot token |
+| Service              | Integration Pattern                                     | Notes                                                           |
+| -------------------- | ------------------------------------------------------- | --------------------------------------------------------------- |
+| Claude Code (hooks)  | stdin/stdout JSON + exit codes                          | Synchronous; hook script must exit with decision                |
+| Claude Code (MCP)    | stdio transport; JSON-RPC via @modelcontextprotocol/sdk | MCP server process is long-lived                                |
+| Slack API            | @slack/bolt Socket Mode (WebSocket); @slack/web-api     | Socket Mode avoids exposing public HTTP endpoints               |
+| Claude API           | @anthropic-ai/sdk; messages endpoint, multimodal        | For voice note transcription + image interpretation only        |
+| Slack file downloads | HTTPS with Authorization: Bearer token                  | Files are not publicly accessible; must download with bot token |
 
 ### Internal Boundaries
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Hook script ↔ MCP server | Local HTTP (port configured via env var) | MCP server exposes a thin HTTP endpoint alongside its stdio MCP protocol |
-| MCP server ↔ Messaging Engine | Direct function call (same process) | No IPC needed — engine is imported by MCP server |
-| Messaging Engine ↔ Adapters | TypeScript interface (MessagingAdapter) | Engine never imports Slack SDK directly |
-| Adapter ↔ State Store | Direct function call (same process) | State store is an in-process singleton |
-| State Store ↔ disk | File system (JSON) or SQLite | SQLite preferred — handles concurrent reads from hook polls |
+| Boundary                      | Communication                            | Notes                                                                    |
+| ----------------------------- | ---------------------------------------- | ------------------------------------------------------------------------ |
+| Hook script ↔ MCP server      | Local HTTP (port configured via env var) | MCP server exposes a thin HTTP endpoint alongside its stdio MCP protocol |
+| MCP server ↔ Messaging Engine | Direct function call (same process)      | No IPC needed — engine is imported by MCP server                         |
+| Messaging Engine ↔ Adapters   | TypeScript interface (MessagingAdapter)  | Engine never imports Slack SDK directly                                  |
+| Adapter ↔ State Store         | Direct function call (same process)      | State store is an in-process singleton                                   |
+| State Store ↔ disk            | File system (JSON) or SQLite             | SQLite preferred — handles concurrent reads from hook polls              |
 
 ---
 
 ## Scaling Considerations
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 1 user (personal) | Local process, SQLite state, Socket Mode for Slack — current design works perfectly |
-| 2-10 users (small team) | Same design; add per-user config, multi-user Slack workspace routing |
-| Cloud deployment | Wrap MCP server in a persistent process (Fly.io, Railway); switch Slack to HTTP Events API with public endpoint; externalize state to Redis/Postgres |
-| Multi-workspace Slack | Add workspace registry in state store; scope Slack connections per workspace |
+| Scale                   | Architecture Adjustments                                                                                                                             |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 user (personal)       | Local process, SQLite state, Socket Mode for Slack — current design works perfectly                                                                  |
+| 2-10 users (small team) | Same design; add per-user config, multi-user Slack workspace routing                                                                                 |
+| Cloud deployment        | Wrap MCP server in a persistent process (Fly.io, Railway); switch Slack to HTTP Events API with public endpoint; externalize state to Redis/Postgres |
+| Multi-workspace Slack   | Add workspace registry in state store; scope Slack connections per workspace                                                                         |
 
 ### Scaling Priorities
 
@@ -468,5 +477,5 @@ Integration test: full escalation round-trip
 
 ---
 
-*Architecture research for: Escalate — Claude Code plugin (hooks + MCP + Slack)*
-*Researched: 2026-02-18*
+_Architecture research for: Escalate — Claude Code plugin (hooks + MCP + Slack)_
+_Researched: 2026-02-18_

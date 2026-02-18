@@ -10,36 +10,36 @@
 
 ### Core Technologies
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| TypeScript | 5.9.3 | Language | Strict type safety for complex async hook/MCP/Slack interaction flows; catches stdio protocol errors at compile time; ESM-native in TS 5.x |
-| Node.js | >=20.0.0 (LTS 22.x preferred) | Runtime | MCP SDK requires >=18; Slack Bolt requires >=18; `tsx` (dev runner) requires ^20 or ^22; Node 22 is current LTS as of 2026 |
-| `@modelcontextprotocol/sdk` | 1.27.0 | MCP server implementation | Official Anthropic SDK; provides `McpServer` (high-level), `StdioServerTransport` (for Claude Code plugin), `StreamableHTTPServerTransport` (for remote access); ESM-native |
-| `@slack/bolt` | 4.6.0 | Slack app framework | Official Slack SDK; handles OAuth, event subscriptions, interactive components (Block Kit buttons, modals), socket mode for local-first dev; Node >=18 |
-| `@anthropic-ai/sdk` | 0.76.0 | Claude API client | Required for interpreting voice notes/images via Claude's vision/audio API before feeding decisions back |
-| `zod` | 4.3.6 | Schema validation | MCP SDK peer dependency (`^3.25 || ^4.0`); use for defining tool input schemas in `McpServer.registerTool()`; also validates hook stdin payloads |
+| Technology                  | Version                       | Purpose                   | Why Recommended                                                                                                                                                             |
+| --------------------------- | ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------------------------------------------------------------------------------------------------------- |
+| TypeScript                  | 5.9.3                         | Language                  | Strict type safety for complex async hook/MCP/Slack interaction flows; catches stdio protocol errors at compile time; ESM-native in TS 5.x                                  |
+| Node.js                     | >=20.0.0 (LTS 22.x preferred) | Runtime                   | MCP SDK requires >=18; Slack Bolt requires >=18; `tsx` (dev runner) requires ^20 or ^22; Node 22 is current LTS as of 2026                                                  |
+| `@modelcontextprotocol/sdk` | 1.27.0                        | MCP server implementation | Official Anthropic SDK; provides `McpServer` (high-level), `StdioServerTransport` (for Claude Code plugin), `StreamableHTTPServerTransport` (for remote access); ESM-native |
+| `@slack/bolt`               | 4.6.0                         | Slack app framework       | Official Slack SDK; handles OAuth, event subscriptions, interactive components (Block Kit buttons, modals), socket mode for local-first dev; Node >=18                      |
+| `@anthropic-ai/sdk`         | 0.76.0                        | Claude API client         | Required for interpreting voice notes/images via Claude's vision/audio API before feeding decisions back                                                                    |
+| `zod`                       | 4.3.6                         | Schema validation         | MCP SDK peer dependency (`^3.25                                                                                                                                             |     | ^4.0`); use for defining tool input schemas in `McpServer.registerTool()`; also validates hook stdin payloads |
 
 ### Supporting Libraries
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| `@slack/web-api` | 7.14.1 | Slack REST API client | Sending rich Block Kit messages, uploading files, fetching message history; bundled with `@slack/bolt` but can be used directly for non-event flows |
-| `@slack/socket-mode` | 2.0.5 | WebSocket connection to Slack | Local-first development without a public URL; no ngrok needed; bundled with `@slack/bolt` |
-| `slack-block-builder` | 2.8.0 | Composable Block Kit builder | Fluent API for building complex Slack messages (blocks, buttons, polls); avoids raw JSON hell for interactive messages; verified on npm |
-| `p-queue` | 9.1.0 | Async queue with concurrency control | Managing Slack response polling: wait for user reply without blocking; ESM-only (type: module), Node >=20 required |
-| `better-sqlite3` | 12.6.2 | Local SQLite persistence | Tracking pending escalations (message_ts, channel, session_id, timeout); local-first; synchronous API fits hook script pattern; Node 20.x/22.x |
-| `@types/better-sqlite3` | 7.6.13 | TypeScript types for better-sqlite3 | Dev dependency for sqlite3 types |
-| `pino` | 10.3.1 | Structured logging | Fast JSON logging; works cleanly with stdout/stderr in MCP stdio context (hook scripts must not pollute stdout); minimal overhead |
+| Library                 | Version | Purpose                              | When to Use                                                                                                                                         |
+| ----------------------- | ------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@slack/web-api`        | 7.14.1  | Slack REST API client                | Sending rich Block Kit messages, uploading files, fetching message history; bundled with `@slack/bolt` but can be used directly for non-event flows |
+| `@slack/socket-mode`    | 2.0.5   | WebSocket connection to Slack        | Local-first development without a public URL; no ngrok needed; bundled with `@slack/bolt`                                                           |
+| `slack-block-builder`   | 2.8.0   | Composable Block Kit builder         | Fluent API for building complex Slack messages (blocks, buttons, polls); avoids raw JSON hell for interactive messages; verified on npm             |
+| `p-queue`               | 9.1.0   | Async queue with concurrency control | Managing Slack response polling: wait for user reply without blocking; ESM-only (type: module), Node >=20 required                                  |
+| `better-sqlite3`        | 12.6.2  | Local SQLite persistence             | Tracking pending escalations (message_ts, channel, session_id, timeout); local-first; synchronous API fits hook script pattern; Node 20.x/22.x      |
+| `@types/better-sqlite3` | 7.6.13  | TypeScript types for better-sqlite3  | Dev dependency for sqlite3 types                                                                                                                    |
+| `pino`                  | 10.3.1  | Structured logging                   | Fast JSON logging; works cleanly with stdout/stderr in MCP stdio context (hook scripts must not pollute stdout); minimal overhead                   |
 
 ### Development Tools
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| `tsx` | TypeScript execute (dev runner) | Run `.ts` files directly without a build step; powered by esbuild; use for hook scripts and dev iteration; requires Node ^20 or ^22 |
-| `tsup` | TypeScript bundler | Bundle MCP server and hook scripts for distribution in the plugin; ESM output; esbuild-based; Node >=18; produces clean `dist/` for `${CLAUDE_PLUGIN_ROOT}` paths |
-| `vitest` | Test framework | Fast, ESM-native, TypeScript-first; works well with MCP tool handlers and Slack event handlers; Node >=20; replaces Jest in ESM projects |
-| `typescript` | Type checker | 5.9.3; use `tsconfig` with `"module": "Node16"` or `"NodeNext"` for ESM-compatible output |
-| `@types/node` | Node.js type definitions | 25.2.3; required for `process.stdin`, `process.stdout` in MCP stdio transport |
+| Tool          | Purpose                         | Notes                                                                                                                                                             |
+| ------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tsx`         | TypeScript execute (dev runner) | Run `.ts` files directly without a build step; powered by esbuild; use for hook scripts and dev iteration; requires Node ^20 or ^22                               |
+| `tsup`        | TypeScript bundler              | Bundle MCP server and hook scripts for distribution in the plugin; ESM output; esbuild-based; Node >=18; produces clean `dist/` for `${CLAUDE_PLUGIN_ROOT}` paths |
+| `vitest`      | Test framework                  | Fast, ESM-native, TypeScript-first; works well with MCP tool handlers and Slack event handlers; Node >=20; replaces Jest in ESM projects                          |
+| `typescript`  | Type checker                    | 5.9.3; use `tsconfig` with `"module": "Node16"` or `"NodeNext"` for ESM-compatible output                                                                         |
+| `@types/node` | Node.js type definitions        | 25.2.3; required for `process.stdin`, `process.stdout` in MCP stdio transport                                                                                     |
 
 ---
 
@@ -122,48 +122,51 @@ The core escalation loop requires Claude Code to pause, send a Slack message, an
 
 ## Alternatives Considered
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| `@slack/bolt` v4 | Slack Events API raw HTTP | When you want zero SDK dependencies; bolt is official and maintained, raw HTTP adds complexity with no benefit here |
-| `better-sqlite3` | Redis / file-based IPC | Redis adds deployment complexity for a local-first plugin; file-based IPC is fragile; SQLite is zero-config, local, and synchronous |
-| `StdioServerTransport` (MCP) | `StreamableHTTPServerTransport` | When the plugin needs to serve remote clients over HTTP (cloud-ready phase); not needed for Claude Code local plugin |
-| `slack-block-builder` | Raw Block Kit JSON | Raw JSON is error-prone for nested interactive blocks; `slack-block-builder` provides type-safe composable API |
-| Socket Mode (Slack) | HTTP + ngrok | ngrok is a dev-only workaround; Socket Mode works in production too for small-scale use |
-| `tsx` (dev) + `tsup` (build) | `ts-node` | `ts-node` has poor ESM support; `tsx` is faster (esbuild-based) and ESM-native; `tsup` handles bundling for distribution |
-| `vitest` | Jest | Jest has ESM configuration pain; Vitest is ESM-native, faster, and compatible with the project's ESM requirement |
-| `pino` | `winston` | Winston has more overhead; pino writes structured JSON to stderr without touching stdout (critical for MCP stdio compliance) |
+| Recommended                  | Alternative                     | When to Use Alternative                                                                                                             |
+| ---------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `@slack/bolt` v4             | Slack Events API raw HTTP       | When you want zero SDK dependencies; bolt is official and maintained, raw HTTP adds complexity with no benefit here                 |
+| `better-sqlite3`             | Redis / file-based IPC          | Redis adds deployment complexity for a local-first plugin; file-based IPC is fragile; SQLite is zero-config, local, and synchronous |
+| `StdioServerTransport` (MCP) | `StreamableHTTPServerTransport` | When the plugin needs to serve remote clients over HTTP (cloud-ready phase); not needed for Claude Code local plugin                |
+| `slack-block-builder`        | Raw Block Kit JSON              | Raw JSON is error-prone for nested interactive blocks; `slack-block-builder` provides type-safe composable API                      |
+| Socket Mode (Slack)          | HTTP + ngrok                    | ngrok is a dev-only workaround; Socket Mode works in production too for small-scale use                                             |
+| `tsx` (dev) + `tsup` (build) | `ts-node`                       | `ts-node` has poor ESM support; `tsx` is faster (esbuild-based) and ESM-native; `tsup` handles bundling for distribution            |
+| `vitest`                     | Jest                            | Jest has ESM configuration pain; Vitest is ESM-native, faster, and compatible with the project's ESM requirement                    |
+| `pino`                       | `winston`                       | Winston has more overhead; pino writes structured JSON to stderr without touching stdout (critical for MCP stdio compliance)        |
 
 ---
 
 ## What NOT to Use
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| `Server` (low-level MCP class) | Deprecated in favor of `McpServer` per SDK source: "Use `McpServer` instead for the high-level API. Only use `Server` for advanced use cases." | `McpServer` from `@modelcontextprotocol/sdk/server/mcp.js` |
-| `ts-node` | Poor ESM support; slow; struggles with Node16 module resolution required by MCP SDK | `tsx` for development, `tsup` for builds |
-| `SSEServerTransport` (MCP) | Deprecated transport; replaced by `StreamableHTTPServerTransport` | `StreamableHTTPServerTransport` if HTTP transport ever needed |
-| `require()` / CommonJS in MCP server | MCP SDK is ESM-only; mixing CJS breaks imports | Pure ESM project (`"type": "module"` in package.json) |
-| `@slack/bolt` v3 | v3 is on a `@slack/bolt@3.19.0` dist-tag, not `latest`; v4 is current with Express v5, no breaking changes for basic usage | `@slack/bolt` v4.6.0 |
-| `console.log` in hook scripts or MCP server | In stdio MCP context, anything written to stdout that isn't a valid JSON-RPC message breaks the protocol | `pino` writing to stderr; use `server.sendLoggingMessage()` for in-band MCP logging |
-| `multer` / file upload libraries for Slack | Slack sends file URLs, not raw uploads; fetch the file URL using the bot token via `@slack/web-api`'s `files.info` | `@slack/web-api` + `node-fetch` or native `fetch` (Node 22 built-in) |
+| Avoid                                       | Why                                                                                                                                            | Use Instead                                                                         |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `Server` (low-level MCP class)              | Deprecated in favor of `McpServer` per SDK source: "Use `McpServer` instead for the high-level API. Only use `Server` for advanced use cases." | `McpServer` from `@modelcontextprotocol/sdk/server/mcp.js`                          |
+| `ts-node`                                   | Poor ESM support; slow; struggles with Node16 module resolution required by MCP SDK                                                            | `tsx` for development, `tsup` for builds                                            |
+| `SSEServerTransport` (MCP)                  | Deprecated transport; replaced by `StreamableHTTPServerTransport`                                                                              | `StreamableHTTPServerTransport` if HTTP transport ever needed                       |
+| `require()` / CommonJS in MCP server        | MCP SDK is ESM-only; mixing CJS breaks imports                                                                                                 | Pure ESM project (`"type": "module"` in package.json)                               |
+| `@slack/bolt` v3                            | v3 is on a `@slack/bolt@3.19.0` dist-tag, not `latest`; v4 is current with Express v5, no breaking changes for basic usage                     | `@slack/bolt` v4.6.0                                                                |
+| `console.log` in hook scripts or MCP server | In stdio MCP context, anything written to stdout that isn't a valid JSON-RPC message breaks the protocol                                       | `pino` writing to stderr; use `server.sendLoggingMessage()` for in-band MCP logging |
+| `multer` / file upload libraries for Slack  | Slack sends file URLs, not raw uploads; fetch the file URL using the bot token via `@slack/web-api`'s `files.info`                             | `@slack/web-api` + `node-fetch` or native `fetch` (Node 22 built-in)                |
 
 ---
 
 ## Stack Patterns by Variant
 
 **If local-only (Claude Code plugin, no cloud deployment):**
+
 - Use `StdioServerTransport` for MCP
 - Use Socket Mode for Slack
 - Use `better-sqlite3` for state
 - Run with `tsx` in dev, bundle with `tsup` for release
 
 **If cloud-hosted (team-wide deployment, public webhook URL):**
+
 - Use `StreamableHTTPServerTransport` for MCP (wraps Node.js HTTP)
 - Use Slack HTTP mode (Events API webhooks)
 - Swap `better-sqlite3` for PostgreSQL (add `pg` + connection pooling)
 - Deploy as a Node.js service (Docker or Fly.io)
 
 **If multi-platform adapter (Teams, Discord, etc.):**
+
 - Define `MessagingAdapter` interface with `send()`, `waitForReply()`, `parseMedia()` methods
 - Implement `SlackAdapter`, `TeamsAdapter` etc.
 - The MCP server tools call the adapter, not Slack directly
@@ -173,16 +176,16 @@ The core escalation loop requires Claude Code to pause, send a Slack message, an
 
 ## Version Compatibility
 
-| Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| `@modelcontextprotocol/sdk@1.27.0` | `zod@^3.25 \|\| ^4.0` | MCP SDK peer dep; use zod 4.x (latest is 4.3.6) |
-| `@modelcontextprotocol/sdk@1.27.0` | `node>=18` | Strict ESM; recommend Node 22 LTS for tsx compatibility |
-| `@slack/bolt@4.6.0` | `@slack/web-api@^7.12.0`, `@slack/socket-mode@^2.0.5` | Bolt 4 bundles these; no separate install needed |
-| `@slack/bolt@4.6.0` | `node>=18` | Same as MCP SDK; Node 22 LTS recommended |
-| `p-queue@9.1.0` | `node>=20` | ESM-only; requires Node 20+ |
-| `tsx@4.21.0` | `node ^20.0.0 \|\| ^22.0.0 \|\| >=24.0.0` | Will not work on Node 18 |
-| `better-sqlite3@12.6.2` | `node 20.x \|\| 22.x \|\| 23.x \|\| 24.x \|\| 25.x` | Will not work on Node 18 |
-| `tsup@8.5.1` | `node>=18` | Fine on Node 18+; ESM output recommended |
+| Package                            | Compatible With                                       | Notes                                                   |
+| ---------------------------------- | ----------------------------------------------------- | ------------------------------------------------------- |
+| `@modelcontextprotocol/sdk@1.27.0` | `zod@^3.25 \|\| ^4.0`                                 | MCP SDK peer dep; use zod 4.x (latest is 4.3.6)         |
+| `@modelcontextprotocol/sdk@1.27.0` | `node>=18`                                            | Strict ESM; recommend Node 22 LTS for tsx compatibility |
+| `@slack/bolt@4.6.0`                | `@slack/web-api@^7.12.0`, `@slack/socket-mode@^2.0.5` | Bolt 4 bundles these; no separate install needed        |
+| `@slack/bolt@4.6.0`                | `node>=18`                                            | Same as MCP SDK; Node 22 LTS recommended                |
+| `p-queue@9.1.0`                    | `node>=20`                                            | ESM-only; requires Node 20+                             |
+| `tsx@4.21.0`                       | `node ^20.0.0 \|\| ^22.0.0 \|\| >=24.0.0`             | Will not work on Node 18                                |
+| `better-sqlite3@12.6.2`            | `node 20.x \|\| 22.x \|\| 23.x \|\| 24.x \|\| 25.x`   | Will not work on Node 18                                |
+| `tsup@8.5.1`                       | `node>=18`                                            | Fine on Node 18+; ESM output recommended                |
 
 **Recommended pinned engine:** `"node": ">=22.0.0"` in `package.json` — satisfies all libraries including the stricter `tsx` and `p-queue` requirements.
 
@@ -221,5 +224,5 @@ These are requirements derived from the CLAUDE.md and real plugin analysis, not 
 
 ---
 
-*Stack research for: Escalate — Claude Code plugin + MCP server + Slack integration bridge*
-*Researched: 2026-02-18*
+_Stack research for: Escalate — Claude Code plugin + MCP server + Slack integration bridge_
+_Researched: 2026-02-18_

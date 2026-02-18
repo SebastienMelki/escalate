@@ -14,29 +14,34 @@ A working ESM TypeScript project with shared types, config loading, and strict l
 ## Implementation Decisions
 
 ### Config design
+
 - Config file location: Claude's discretion (pick based on Claude Code plugin conventions)
 - Moderate configurability in v1: Slack config + timeouts + which events to escalate — enough to customize behavior, sensible defaults for everything else
 - Secrets (Slack tokens, API keys) always come from environment variables — config file never contains secrets
 - Single config, one Slack workspace — no profile switching in v1
 
 ### Escalation data shape
+
 - 3 urgency tiers: info / warning / critical — affects display and quiet hours filtering
 - Rich context in escalations: event type + question + tool name + file paths + recent task context — enough to decide from your phone
 - Escalations define suggested actions (e.g., approve/deny/snooze) AND accept free-form text as fallback — typed actions with free-form escape hatch
 
 ### Error handling patterns
+
 - Adapter failure reporting strategy: Claude's discretion (pick based on TypeScript best practices)
 - When Slack is unreachable: queue escalations locally, retry when connection restores
 - If all retries exhaust: always block — if we can't reach the human, Claude can't proceed (safety first)
 - Error verbosity/debug context level: Claude's discretion
 
 ### Project conventions
+
 - Source organized by grouped modules: src/config/, src/adapters/, src/types/, src/hooks/ — organized by domain from the start
 - Test framework: Vitest (ESM-native, fast, Jest-compatible API)
 - Package manager: pnpm
 - Formatting: Prettier for formatting + ESLint for logic rules
 
 ### Claude's Discretion
+
 - Config file location (based on plugin conventions)
 - Error handling pattern (Result types vs exceptions)
 - Error verbosity and debug context level
@@ -63,5 +68,5 @@ None — discussion stayed within phase scope
 
 ---
 
-*Phase: 01-foundation*
-*Context gathered: 2026-02-18*
+_Phase: 01-foundation_
+_Context gathered: 2026-02-18_

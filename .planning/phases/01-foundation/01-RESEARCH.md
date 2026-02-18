@@ -13,9 +13,11 @@ All library versions were verified against the npm registry on 2026-02-18. The M
 **Primary recommendation:** Start with a pure ESM project (`"type": "module"`), pnpm, TypeScript 5.9 with `nodenext` module resolution, tsup for bundling, ESLint 10 with typescript-eslint `strictTypeChecked`, and Zod 4 for config schema validation. Use a lightweight Result type for adapter error reporting (Claude's discretion area).
 
 <user_constraints>
+
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 - Config file location: Claude's discretion (pick based on Claude Code plugin conventions)
 - Moderate configurability in v1: Slack config + timeouts + which events to escalate -- enough to customize behavior, sensible defaults for everything else
 - Secrets (Slack tokens, API keys) always come from environment variables -- config file never contains secrets
@@ -33,6 +35,7 @@ All library versions were verified against the npm registry on 2026-02-18. The M
 - Formatting: Prettier for formatting + ESLint for logic rules
 
 ### Claude's Discretion
+
 - Config file location (based on plugin conventions)
 - Error handling pattern (Result types vs exceptions)
 - Error verbosity and debug context level
@@ -40,56 +43,60 @@ All library versions were verified against the npm registry on 2026-02-18. The M
 - Internal module export strategy (barrel files, direct imports, etc.)
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 None -- discussion stayed within phase scope
 </user_constraints>
 
 <phase_requirements>
+
 ## Phase Requirements
 
-| ID | Description | Research Support |
-|----|-------------|-----------------|
-| PLAT-01 | MCP server runs with stdio transport as Claude Code plugin process | `.mcp.json` config pattern documented; `@modelcontextprotocol/sdk` 1.27.0 with `StdioServerTransport` verified; ESM-only constraint drives project setup |
-| PLAT-02 | MessagingAdapter interface defined with sendEscalation, waitForResponse, sendFollowUp, isConnected methods | Interface pattern documented with code example; urgency tiers and action types from CONTEXT.md integrated into EscalationRequest type |
-| PLAT-06 | Aggressive TypeScript linting -- strict tsconfig, ESLint with @typescript-eslint/strict, no-any rules | Full tsconfig with strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes documented; ESLint 10 flat config with strictTypeChecked + no-explicit-any error rule documented |
-| CFG-01 | All non-secret settings in escalate.config.json -- escalation rules, channel preferences, timeout values | Zod 4 schema validation pattern documented; config file location recommendation made (plugin root); complete config schema shape defined |
-| CFG-04 | All secrets via environment variables (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) -- no hardcoded credentials | Config schema separates secrets (env vars) from settings (config file); Zod schema validates only non-secret config; environment variable loading pattern documented |
+| ID      | Description                                                                                                            | Research Support                                                                                                                                                                   |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PLAT-01 | MCP server runs with stdio transport as Claude Code plugin process                                                     | `.mcp.json` config pattern documented; `@modelcontextprotocol/sdk` 1.27.0 with `StdioServerTransport` verified; ESM-only constraint drives project setup                           |
+| PLAT-02 | MessagingAdapter interface defined with sendEscalation, waitForResponse, sendFollowUp, isConnected methods             | Interface pattern documented with code example; urgency tiers and action types from CONTEXT.md integrated into EscalationRequest type                                              |
+| PLAT-06 | Aggressive TypeScript linting -- strict tsconfig, ESLint with @typescript-eslint/strict, no-any rules                  | Full tsconfig with strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes documented; ESLint 10 flat config with strictTypeChecked + no-explicit-any error rule documented |
+| CFG-01  | All non-secret settings in escalate.config.json -- escalation rules, channel preferences, timeout values               | Zod 4 schema validation pattern documented; config file location recommendation made (plugin root); complete config schema shape defined                                           |
+| CFG-04  | All secrets via environment variables (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) -- no hardcoded credentials | Config schema separates secrets (env vars) from settings (config file); Zod schema validates only non-secret config; environment variable loading pattern documented               |
+
 </phase_requirements>
 
 ## Standard Stack
 
 ### Core
 
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| TypeScript | 5.9.3 | Language / type checker | Latest stable; ESM-native; strict mode family covers all required flags |
-| pnpm | 10.30.0 | Package manager | User-locked decision; fast installs, strict node_modules isolation |
-| tsup | 8.5.1 | TypeScript bundler (ESM output) | Requirements explicitly reference tsup; esbuild-based, zero-config ESM output; still functional despite maintenance-mode status |
-| zod | 4.3.6 | Config schema validation | MCP SDK peer dependency (`^3.25 \|\| ^4.0`); 57% smaller than v3, 6.5x faster object parsing; used for config validation AND MCP tool input schemas in later phases |
-| vitest | 4.0.18 | Test framework | User-locked decision; ESM-native, TypeScript-first, fast |
-| eslint | 10.0.0 | Linting (logic rules) | Latest major; flat config only; typescript-eslint 8.56 already supports it |
-| typescript-eslint | 8.56.0 | TypeScript-specific lint rules | Provides `strictTypeChecked` config; supports ESLint 10; includes `no-explicit-any` |
-| prettier | 3.8.1 | Code formatting | User-locked decision; Prettier for formatting, ESLint for logic |
-| @modelcontextprotocol/sdk | 1.27.0 | MCP server (placeholder import in Phase 1) | Required for PLAT-01; ESM-only; drives project module format |
+| Library                   | Version | Purpose                                    | Why Standard                                                                                                                                                        |
+| ------------------------- | ------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TypeScript                | 5.9.3   | Language / type checker                    | Latest stable; ESM-native; strict mode family covers all required flags                                                                                             |
+| pnpm                      | 10.30.0 | Package manager                            | User-locked decision; fast installs, strict node_modules isolation                                                                                                  |
+| tsup                      | 8.5.1   | TypeScript bundler (ESM output)            | Requirements explicitly reference tsup; esbuild-based, zero-config ESM output; still functional despite maintenance-mode status                                     |
+| zod                       | 4.3.6   | Config schema validation                   | MCP SDK peer dependency (`^3.25 \|\| ^4.0`); 57% smaller than v3, 6.5x faster object parsing; used for config validation AND MCP tool input schemas in later phases |
+| vitest                    | 4.0.18  | Test framework                             | User-locked decision; ESM-native, TypeScript-first, fast                                                                                                            |
+| eslint                    | 10.0.0  | Linting (logic rules)                      | Latest major; flat config only; typescript-eslint 8.56 already supports it                                                                                          |
+| typescript-eslint         | 8.56.0  | TypeScript-specific lint rules             | Provides `strictTypeChecked` config; supports ESLint 10; includes `no-explicit-any`                                                                                 |
+| prettier                  | 3.8.1   | Code formatting                            | User-locked decision; Prettier for formatting, ESLint for logic                                                                                                     |
+| @modelcontextprotocol/sdk | 1.27.0  | MCP server (placeholder import in Phase 1) | Required for PLAT-01; ESM-only; drives project module format                                                                                                        |
 
 ### Supporting
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| @tsconfig/node22 | latest | Base tsconfig for Node 22 | Extend as base, then add strict flags on top |
-| @eslint/js | 10.0.1 | ESLint core recommended rules | Base JS rules that typescript-eslint extends |
-| eslint-config-prettier | 10.1.8 | Disable formatting rules that conflict with Prettier | Must be last in ESLint config array |
-| @types/node | 22.x | Node.js type definitions | Required for process, fs, path types |
+| Library                | Version | Purpose                                              | When to Use                                  |
+| ---------------------- | ------- | ---------------------------------------------------- | -------------------------------------------- |
+| @tsconfig/node22       | latest  | Base tsconfig for Node 22                            | Extend as base, then add strict flags on top |
+| @eslint/js             | 10.0.1  | ESLint core recommended rules                        | Base JS rules that typescript-eslint extends |
+| eslint-config-prettier | 10.1.8  | Disable formatting rules that conflict with Prettier | Must be last in ESLint config array          |
+| @types/node            | 22.x    | Node.js type definitions                             | Required for process, fs, path types         |
 
 ### Alternatives Considered
 
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| tsup 8.5.1 | tsdown 0.20.3 (Rolldown-based) | tsup is in maintenance mode and recommends tsdown; however tsdown is pre-1.0 (0.20.x), tsup is explicitly in requirements, and tsup 8.5.1 works correctly. **Stick with tsup for now.** Flag for Phase 7 re-evaluation. |
-| ESLint 10 | ESLint 9.39.2 | ESLint 10 released 2026-02-06 (12 days old); typescript-eslint already supports it; new project with no migration burden. ESLint 9 is safe fallback if any ecosystem tool lags. |
-| Zod 4.3.6 | Zod 3.x | MCP SDK accepts both (`^3.25 \|\| ^4.0`); Zod 4 is dramatically faster and smaller; no reason to use v3 for a new project |
-| pino (logging) | console.error | pino not needed in Phase 1 (no runtime code). Defer to Phase 2 when MCP server needs stderr-only structured logging. |
+| Instead of     | Could Use                      | Tradeoff                                                                                                                                                                                                                |
+| -------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tsup 8.5.1     | tsdown 0.20.3 (Rolldown-based) | tsup is in maintenance mode and recommends tsdown; however tsdown is pre-1.0 (0.20.x), tsup is explicitly in requirements, and tsup 8.5.1 works correctly. **Stick with tsup for now.** Flag for Phase 7 re-evaluation. |
+| ESLint 10      | ESLint 9.39.2                  | ESLint 10 released 2026-02-06 (12 days old); typescript-eslint already supports it; new project with no migration burden. ESLint 9 is safe fallback if any ecosystem tool lags.                                         |
+| Zod 4.3.6      | Zod 3.x                        | MCP SDK accepts both (`^3.25 \|\| ^4.0`); Zod 4 is dramatically faster and smaller; no reason to use v3 for a new project                                                                                               |
+| pino (logging) | console.error                  | pino not needed in Phase 1 (no runtime code). Defer to Phase 2 when MCP server needs stderr-only structured logging.                                                                                                    |
 
 **Installation (Phase 1 only):**
+
 ```bash
 # Runtime dependencies
 pnpm add zod
@@ -143,6 +150,7 @@ escalate/
 **When to use:** Always. The entire project must be ESM.
 
 **Example -- package.json (relevant fields):**
+
 ```json
 {
   "name": "escalate",
@@ -176,6 +184,7 @@ escalate/
 **When to use:** Always. This is a locked requirement (PLAT-06).
 
 **Example -- tsconfig.json:**
+
 ```json
 {
   "extends": "@tsconfig/node22/tsconfig.json",
@@ -203,6 +212,7 @@ escalate/
 ```
 
 **Key flags explained:**
+
 - `strict: true` -- enables strictNullChecks, strictFunctionTypes, strictBindCallApply, strictPropertyInitialization, noImplicitAny, noImplicitThis, alwaysStrict, useUnknownInCatchVariables
 - `noUncheckedIndexedAccess` -- array/record index access returns `T | undefined`, not `T`
 - `exactOptionalPropertyTypes` -- `foo?: string` means "may be absent" but NOT "may be undefined" unless explicitly `foo?: string | undefined`
@@ -216,6 +226,7 @@ escalate/
 **When to use:** Always. Locked requirement (PLAT-06).
 
 **Example -- eslint.config.ts:**
+
 ```typescript
 import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
@@ -237,10 +248,13 @@ export default defineConfig(
       '@typescript-eslint/no-unsafe-call': 'error',
       '@typescript-eslint/no-unsafe-member-access': 'error',
       '@typescript-eslint/no-unsafe-return': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
     },
   },
   eslintConfigPrettier,
@@ -248,6 +262,7 @@ export default defineConfig(
 ```
 
 **Key points:**
+
 - `strictTypeChecked` is a superset of `strict` that adds type-aware rules
 - `projectService: true` enables type-checked linting via the TypeScript language service
 - `eslint-config-prettier/flat` MUST be last to disable formatting-related rules
@@ -261,6 +276,7 @@ export default defineConfig(
 **When to use:** Config loading in `src/config/loader.ts`.
 
 **Example -- src/config/schema.ts:**
+
 ```typescript
 import * as z from 'zod';
 
@@ -272,10 +288,10 @@ export const SlackConfigSchema = z.object({
 });
 
 export const TimeoutConfigSchema = z.object({
-  permissionRequestMs: z.number().int().min(1000).default(600_000),  // 10 min
-  preToolUseMs: z.number().int().min(1000).default(300_000),          // 5 min
-  stopMs: z.number().int().min(1000).default(600_000),                // 10 min
-  postToolUseFailureMs: z.number().int().min(1000).default(60_000),   // 1 min
+  permissionRequestMs: z.number().int().min(1000).default(600_000), // 10 min
+  preToolUseMs: z.number().int().min(1000).default(300_000), // 5 min
+  stopMs: z.number().int().min(1000).default(600_000), // 10 min
+  postToolUseFailureMs: z.number().int().min(1000).default(60_000), // 1 min
 });
 
 export const EscalationPolicySchema = z.enum(['always', 'never', 'conditional']);
@@ -297,6 +313,7 @@ export type EscalateConfig = z.infer<typeof EscalateConfigSchema>;
 ```
 
 **Example -- src/config/loader.ts:**
+
 ```typescript
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -342,15 +359,24 @@ export function loadConfig(configPath?: string): Result<EscalateConfig, ConfigEr
   return ok(result.data);
 }
 
-export function loadSecrets(): Result<{ slackBotToken: string; slackAppToken: string }, ConfigError> {
+export function loadSecrets(): Result<
+  { slackBotToken: string; slackAppToken: string },
+  ConfigError
+> {
   const slackBotToken = process.env['ESCALATE_SLACK_BOT_TOKEN'];
   const slackAppToken = process.env['ESCALATE_SLACK_APP_TOKEN'];
 
   if (!slackBotToken) {
-    return err({ code: 'MISSING_ENV_VAR', message: 'ESCALATE_SLACK_BOT_TOKEN environment variable is required' });
+    return err({
+      code: 'MISSING_ENV_VAR',
+      message: 'ESCALATE_SLACK_BOT_TOKEN environment variable is required',
+    });
   }
   if (!slackAppToken) {
-    return err({ code: 'MISSING_ENV_VAR', message: 'ESCALATE_SLACK_APP_TOKEN environment variable is required' });
+    return err({
+      code: 'MISSING_ENV_VAR',
+      message: 'ESCALATE_SLACK_APP_TOKEN environment variable is required',
+    });
   }
 
   return ok({ slackBotToken, slackAppToken });
@@ -364,12 +390,14 @@ export function loadSecrets(): Result<{ slackBotToken: string; slackAppToken: st
 **When to use:** For operations that can fail in expected ways (config loading, adapter operations). Do NOT use for programming errors (those should throw).
 
 **Recommendation (Claude's Discretion):** Use a lightweight custom Result type rather than `neverthrow` or plain exceptions. Rationale:
+
 - `neverthrow` adds a dependency and learning curve for a pattern that needs only ~15 lines of code
 - Plain exceptions hide failure modes from type signatures -- callers cannot know a function may fail without reading its source
 - The Result pattern makes failure explicit in the type system, which aligns with the project's strict TypeScript philosophy
 - Reserve `throw` for truly exceptional conditions (programmer errors, invariant violations)
 
 **Example -- src/errors/result.ts:**
+
 ```typescript
 export type Result<T, E> =
   | { readonly success: true; readonly data: T }
@@ -403,6 +431,7 @@ export function unwrapOr<T, E>(result: Result<T, E>, fallback: T): T {
 **When to use:** This interface is the contract between the escalation engine and platform-specific adapters.
 
 **Example -- src/types/adapter.ts:**
+
 ```typescript
 import type { EscalationRequest, UserResponse } from './escalation.js';
 
@@ -422,22 +451,23 @@ export interface MessagingAdapter {
 ```
 
 **Example -- src/types/escalation.ts:**
+
 ```typescript
 export type UrgencyLevel = 'info' | 'warning' | 'critical';
 
 export type ResponseType = 'action' | 'text' | 'timeout';
 
 export interface SuggestedAction {
-  readonly id: string;       // e.g., 'approve', 'deny', 'snooze'
-  readonly label: string;    // Display text for button
+  readonly id: string; // e.g., 'approve', 'deny', 'snooze'
+  readonly label: string; // Display text for button
   readonly style?: 'primary' | 'danger' | 'default';
 }
 
 export interface EscalationContext {
-  readonly eventType: string;           // e.g., 'PermissionRequest', 'PreToolUse'
-  readonly toolName?: string;           // e.g., 'Bash', 'Write'
+  readonly eventType: string; // e.g., 'PermissionRequest', 'PreToolUse'
+  readonly toolName?: string; // e.g., 'Bash', 'Write'
   readonly filePaths?: readonly string[];
-  readonly taskContext?: string;        // Recent task/phase context
+  readonly taskContext?: string; // Recent task/phase context
 }
 
 export interface EscalationRequest {
@@ -451,15 +481,15 @@ export interface EscalationRequest {
 
 export interface UserResponse {
   readonly type: ResponseType;
-  readonly actionId?: string;           // Which suggested action was chosen
-  readonly text?: string;               // Free-form text or action label
+  readonly actionId?: string; // Which suggested action was chosen
+  readonly text?: string; // Free-form text or action label
   readonly respondedAt: Date;
 }
 
 export interface EscalationTimeout {
   readonly type: 'timeout';
   readonly timeoutMs: number;
-  readonly fallbackAction: 'block';     // Always block when unreachable (locked decision)
+  readonly fallbackAction: 'block'; // Always block when unreachable (locked decision)
 }
 ```
 
@@ -475,13 +505,13 @@ export interface EscalationTimeout {
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Config schema validation | Custom JSON validator | Zod 4 `safeParse()` | Edge cases: nested objects, default values, type coercion, error messages. Zod handles all of these and infers TypeScript types from schemas. |
-| TypeScript linting rules | Custom AST checks | `@typescript-eslint/strict-type-checked` | 100+ rules maintained by the typescript-eslint team; covers `no-explicit-any`, `no-unsafe-*`, strict boolean expressions, and dozens more. |
-| ESM module resolution | Manual `.js` extension rewriting | tsup bundler + `verbatimModuleSyntax` | TypeScript ESM requires `.js` extensions in imports even for `.ts` files when not bundled. tsup handles this during bundling. |
-| Code formatting | ESLint formatting rules | Prettier | Formatting debates are endless. Prettier is opinionated and consistent. ESLint formatting rules conflict with Prettier -- use eslint-config-prettier to disable them. |
-| Node.js tsconfig base | Manual target/lib/module settings | `@tsconfig/node22` | Maintained by the TypeScript team; correct `lib`, `target`, and `module` for Node 22. |
+| Problem                  | Don't Build                       | Use Instead                              | Why                                                                                                                                                                   |
+| ------------------------ | --------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Config schema validation | Custom JSON validator             | Zod 4 `safeParse()`                      | Edge cases: nested objects, default values, type coercion, error messages. Zod handles all of these and infers TypeScript types from schemas.                         |
+| TypeScript linting rules | Custom AST checks                 | `@typescript-eslint/strict-type-checked` | 100+ rules maintained by the typescript-eslint team; covers `no-explicit-any`, `no-unsafe-*`, strict boolean expressions, and dozens more.                            |
+| ESM module resolution    | Manual `.js` extension rewriting  | tsup bundler + `verbatimModuleSyntax`    | TypeScript ESM requires `.js` extensions in imports even for `.ts` files when not bundled. tsup handles this during bundling.                                         |
+| Code formatting          | ESLint formatting rules           | Prettier                                 | Formatting debates are endless. Prettier is opinionated and consistent. ESLint formatting rules conflict with Prettier -- use eslint-config-prettier to disable them. |
+| Node.js tsconfig base    | Manual target/lib/module settings | `@tsconfig/node22`                       | Maintained by the TypeScript team; correct `lib`, `target`, and `module` for Node 22.                                                                                 |
 
 **Key insight:** Phase 1 is all configuration and type definitions. The temptation is to "just write it by hand." But config validation, linting, and module resolution have deep edge cases that established tools handle correctly. Hand-rolling these leads to subtle bugs that surface in later phases.
 
@@ -549,6 +579,7 @@ export default defineConfig({
   outDir: 'dist',
 });
 ```
+
 Source: tsup official documentation (tsup.egoist.dev), verified against npm registry
 
 ### Vitest Configuration
@@ -570,6 +601,7 @@ export default defineConfig({
   },
 });
 ```
+
 Source: Vitest documentation (vitest.dev)
 
 ### Prettier Configuration
@@ -593,6 +625,7 @@ Source: Vitest documentation (vitest.dev)
   "description": "Smart escalation bridge between Claude Code and messaging platforms"
 }
 ```
+
 Source: Claude Code Plugins Reference (code.claude.com/docs/en/plugins-reference)
 
 ### Config File Location Decision (Claude's Discretion)
@@ -600,6 +633,7 @@ Source: Claude Code Plugins Reference (code.claude.com/docs/en/plugins-reference
 **Recommendation:** Place `escalate.config.json` at the plugin root directory (same level as `package.json` and `.claude-plugin/`).
 
 **Rationale:**
+
 - Claude Code plugins are copied to `~/.claude/plugins/cache/` after installation. The config file must be inside the plugin root to survive this copy.
 - The `.mcp.json` pattern in Claude Code uses `${CLAUDE_PLUGIN_ROOT}` for paths. The config loader should use this same variable: `${CLAUDE_PLUGIN_ROOT}/escalate.config.json`.
 - Other plugins (hookify, ralph-loop) keep their configuration at the plugin root level.
@@ -616,6 +650,7 @@ src/errors/result.ts     -- single file, no barrel needed
 ```
 
 **Rationale:**
+
 - Domain barrels (`src/types/index.ts`) keep imports clean within a domain
 - Cross-domain imports use the barrel: `import type { EscalationRequest } from '../types/index.js'`
 - No root barrel (`src/index.ts`) to avoid circular dependencies and unused re-exports
@@ -628,12 +663,13 @@ src/errors/result.ts     -- single file, no barrel needed
 ```typescript
 export interface ConfigError {
   code: 'FILE_NOT_FOUND' | 'INVALID_JSON' | 'VALIDATION_FAILED' | 'MISSING_ENV_VAR';
-  message: string;      // Human-readable, always present
-  details?: unknown;     // Zod error, parse error, etc. -- for debug logging
+  message: string; // Human-readable, always present
+  details?: unknown; // Zod error, parse error, etc. -- for debug logging
 }
 ```
 
 **Rationale:**
+
 - Error codes enable programmatic handling (switch on `code`)
 - Human-readable messages provide immediate context
 - Optional `details` field carries structured error data (Zod validation errors, stack traces) for debug logging without cluttering the primary message
@@ -641,16 +677,17 @@ export interface ConfigError {
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| ESLint `.eslintrc.js` | ESLint `eslint.config.ts` (flat config) | ESLint 9 (2024), mandatory in ESLint 10 (2026-02) | Flat config is the only supported format in ESLint 10 |
-| Zod 3.x `message` param | Zod 4.x `error` param | Zod 4.0 (2025) | Custom error messages use `error` instead of `message` |
-| `ts-node` for dev | `tsx` for dev | 2024+ | tsx is ESM-native and esbuild-based; ts-node has poor ESM support |
-| tsup (esbuild) | tsdown (Rolldown) | 2025-2026 | tsup is in maintenance mode; tsdown recommended. But tsdown is pre-1.0. Stick with tsup for now. |
-| Jest for testing | Vitest | 2023+ | Vitest is ESM-native, faster, TypeScript-first |
-| `module: "commonjs"` | `module: "nodenext"` | TypeScript 5.x | ESM is the standard for new Node.js projects |
+| Old Approach            | Current Approach                        | When Changed                                      | Impact                                                                                           |
+| ----------------------- | --------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| ESLint `.eslintrc.js`   | ESLint `eslint.config.ts` (flat config) | ESLint 9 (2024), mandatory in ESLint 10 (2026-02) | Flat config is the only supported format in ESLint 10                                            |
+| Zod 3.x `message` param | Zod 4.x `error` param                   | Zod 4.0 (2025)                                    | Custom error messages use `error` instead of `message`                                           |
+| `ts-node` for dev       | `tsx` for dev                           | 2024+                                             | tsx is ESM-native and esbuild-based; ts-node has poor ESM support                                |
+| tsup (esbuild)          | tsdown (Rolldown)                       | 2025-2026                                         | tsup is in maintenance mode; tsdown recommended. But tsdown is pre-1.0. Stick with tsup for now. |
+| Jest for testing        | Vitest                                  | 2023+                                             | Vitest is ESM-native, faster, TypeScript-first                                                   |
+| `module: "commonjs"`    | `module: "nodenext"`                    | TypeScript 5.x                                    | ESM is the standard for new Node.js projects                                                     |
 
 **Deprecated/outdated:**
+
 - tsup: In maintenance mode, recommends tsdown. Still functional at 8.5.1. Flag for re-evaluation in Phase 7.
 - ESLint `.eslintrc.*` format: Not supported in ESLint 10. Use flat config only.
 - `SSEServerTransport` (MCP SDK): Deprecated in favor of `StreamableHTTPServerTransport`. Not relevant to Phase 1 but noted for future phases.
@@ -675,6 +712,7 @@ export interface ConfigError {
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - npm registry -- `npm show` for all package versions, engines, peer dependencies (TypeScript 5.9.3, tsup 8.5.1, zod 4.3.6, vitest 4.0.18, eslint 10.0.0, typescript-eslint 8.56.0, prettier 3.8.1, pnpm 10.30.0, tsdown 0.20.3)
 - [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference) -- plugin structure, .mcp.json patterns, CLAUDE_PLUGIN_ROOT, hooks.json format
 - [typescript-eslint Shared Configs](https://typescript-eslint.io/users/configs/) -- strictTypeChecked config, flat config examples
@@ -683,17 +721,20 @@ export interface ConfigError {
 - [tsconfig/bases node22.json](https://github.com/tsconfig/bases/blob/main/bases/node22.json) -- official TypeScript Node 22 base config
 
 ### Secondary (MEDIUM confidence)
+
 - [tsup GitHub README](https://github.com/egoist/tsup) -- maintenance status notice, tsdown migration recommendation
 - [tsdown migration guide](https://tsdown.dev/guide/migrate-from-tsup) -- configuration differences, feature gaps
 - [TypeScript Result pattern articles](https://hamy.xyz/blog/2025-07_typescript-result-types) -- performance benchmarks (errors-as-values faster than exceptions), community patterns
 - [eslint-config-prettier](https://github.com/prettier/eslint-config-prettier) -- flat config integration pattern
 
 ### Tertiary (LOW confidence)
+
 - None -- all findings verified through primary or secondary sources.
 
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH -- all versions verified via npm registry on 2026-02-18
 - Architecture: HIGH -- patterns derived from existing project research (ARCHITECTURE.md, STACK.md) and official Claude Code plugin documentation
 - Pitfalls: HIGH -- ESM constraints and strict TypeScript flags are well-documented; Zod 4 migration guide is authoritative

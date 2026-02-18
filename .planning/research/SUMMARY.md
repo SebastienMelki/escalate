@@ -24,6 +24,7 @@ The stack is fully ESM-native, centered on `@modelcontextprotocol/sdk@1.27.0` (s
 The most important stack decision is to reject `ts-node` (poor ESM support), `SSEServerTransport` (deprecated), `console.log` in hook scripts (corrupts stdio protocol), and per-hook Slack connections (Socket Mode requires a persistent WebSocket, not a connection-per-invocation). The replacement for `ts-node` is `tsx` for dev and `tsup` for production bundling. All final output must be ESM bundles — hook scripts can use `.cjs` extension if needed but the MCP server must be pure ESM.
 
 **Core technologies:**
+
 - `@modelcontextprotocol/sdk@1.27.0`: MCP server (stdio transport) — official Anthropic SDK, McpServer high-level API
 - `@slack/bolt@4.6.0`: Slack bot framework (Socket Mode) — official SDK, handles OAuth + interactive components
 - `better-sqlite3@12.6.2`: IPC state store — synchronous API ideal for hook polling loop, zero config
@@ -38,6 +39,7 @@ The most important stack decision is to reject `ts-node` (poor ESM support), `SS
 The research draws a clear line between what is mandatory for v1 (the core escalation loop) and what is dangerous to build now (multi-user workflows, streaming Claude output to Slack, natural language command parsing). The MVP must validate one loop: Claude stops → Slack message sent → user responds → Claude continues.
 
 **Must have (P1 — v1 launch):**
+
 - Hook-based event interception — `PermissionRequest`, `PreToolUse`, `Stop`, `PostToolUseFailure` minimum event set
 - Slack message delivery with Block Kit formatting — plain text is not acceptable UX for phone-based decisions
 - Interactive buttons (Approve/Deny/Snooze) — without buttons users must type; too slow from a phone
@@ -50,6 +52,7 @@ The research draws a clear line between what is mandatory for v1 (the core escal
 - Config without code changes — `escalate.config.json` for tokens, channels, escalation rules
 
 **Should have (P2 — v1.x after validation):**
+
 - Voice note interpretation (Claude API multimodal) — lowest friction response from mobile
 - Emoji reaction responses (`reaction_added` events) — even faster than buttons for binary decisions
 - Auto-approval rules (tool name / path pattern matching) — reduces Slack noise as usage scales
@@ -58,12 +61,14 @@ The research draws a clear line between what is mandatory for v1 (the core escal
 - Quiet hours / time-based escalation suppression — defer until users report notification fatigue
 
 **Defer (v2+):**
+
 - GitHub PR/issue awareness as context — powerful but requires GitHub token and adds API complexity
 - Telegram/WhatsApp/GitHub adapter implementations — architecture must be ready (adapter pattern), but don't build yet
 - Plugin health dashboard (Slack App Home tab) — high Slack complexity, low v1 priority
 - Multi-user approval workflows — this is a different product (PagerDuty), not a personal autonomy tool
 
 **Anti-features (do not build):**
+
 - Real-time Claude output streaming to Slack — Slack rate limits (1 msg/sec) make this impossible at GSD throughput
 - Natural language command parsing from Slack — expands scope to "Slack interface to Claude", which is a different product
 - Per-message E2E encryption — Slack Enterprise handles this; custom crypto adds complexity without threat-model benefit
@@ -73,6 +78,7 @@ The research draws a clear line between what is mandatory for v1 (the core escal
 The system has four process boundaries: Claude Code (host), hook scripts (short-lived subprocesses called per event), MCP server (long-lived stdio process managed by Claude Code), and the Slack platform (external WebSocket via Socket Mode). The architectural mandate is: hook scripts are thin dispatchers (50 lines max), all business logic lives in the MCP server's messaging engine, the Slack Socket Mode connection is owned exclusively by the MCP server, and SQLite is the IPC handoff point for responses. The hook script cannot share stdio with the MCP server — Claude Code owns both channels separately. A local HTTP bridge on the MCP server side solves this cleanly.
 
 **Major components:**
+
 1. `hooks/hooks.json` + `scripts/` — Event entry points; thin dispatchers; read config, decide escalate/pass, call MCP HTTP bridge, return decision via exit code
 2. `servers/escalate-mcp.ts` — Long-lived MCP server (stdio); owns Slack Socket Mode connection; exposes `escalate()`, `check_pending()`, `configure()` tools to Claude LLM and HTTP bridge to hook scripts
 3. `src/messaging/engine.ts` — Escalation engine; applies trigger config; routes to adapter; manages pending escalation state
@@ -207,10 +213,12 @@ Based on the dependency graph from architecture research and pitfall phase mappi
 ### Research Flags
 
 **Needs `/gsd:research-phase` during planning:**
+
 - **Phase 4 (Hook Scripts):** Verify exact JSON shape of each hook event type (PermissionRequest, PreToolUse, PostToolUseFailure, Stop) against live Claude Code behavior. Training data may not reflect current format.
 - **Phase 6 (Voice Notes):** Verify Claude API audio input support (`@anthropic-ai/sdk@0.76.0` — does `messages` endpoint accept audio content blocks?). If not, design Whisper API fallback.
 
 **Standard patterns (skip research-phase):**
+
 - **Phase 1:** ESM TypeScript + tsup setup is extremely well-documented.
 - **Phase 2:** SQLite polling + local HTTP bridge is a standard IPC pattern.
 - **Phase 3:** Slack Socket Mode + Block Kit is well-documented in Bolt v4 docs.
@@ -221,12 +229,12 @@ Based on the dependency graph from architecture research and pitfall phase mappi
 
 ## Confidence Assessment
 
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | HIGH | All package versions verified against live npm registry; MCP SDK internals read from installed source in `~/.npm`; Claude Code plugin patterns verified from first-party marketplace plugin examples |
-| Features | MEDIUM | Project spec and CLAUDE.md are HIGH confidence; Slack Block Kit patterns from training data (MEDIUM); Claude API audio input support unverified — needs Phase 6 validation |
-| Architecture | HIGH | Derived from first-party plugin documentation, real marketplace plugin examples (hookify, ralph-loop), and CLAUDE.md; IPC pattern is well-established |
-| Pitfalls | HIGH | Derived directly from stack/architecture research + first-party plugin examples; not theoretical — based on actual protocol and SDK constraints |
+| Area         | Confidence | Notes                                                                                                                                                                                                |
+| ------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stack        | HIGH       | All package versions verified against live npm registry; MCP SDK internals read from installed source in `~/.npm`; Claude Code plugin patterns verified from first-party marketplace plugin examples |
+| Features     | MEDIUM     | Project spec and CLAUDE.md are HIGH confidence; Slack Block Kit patterns from training data (MEDIUM); Claude API audio input support unverified — needs Phase 6 validation                           |
+| Architecture | HIGH       | Derived from first-party plugin documentation, real marketplace plugin examples (hookify, ralph-loop), and CLAUDE.md; IPC pattern is well-established                                                |
+| Pitfalls     | HIGH       | Derived directly from stack/architecture research + first-party plugin examples; not theoretical — based on actual protocol and SDK constraints                                                      |
 
 **Overall confidence:** HIGH
 
@@ -271,5 +279,5 @@ Based on the dependency graph from architecture research and pitfall phase mappi
 
 ---
 
-*Research completed: 2026-02-18*
-*Ready for roadmap: yes*
+_Research completed: 2026-02-18_
+_Ready for roadmap: yes_
