@@ -132,7 +132,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTL-05     | Phase 5 | Pending  |
 | MDIA-01     | Phase 6 | Pending  |
 | MDIA-02     | Phase 6 | Pending  |
-| PLAT-01     | Phase 1 | Pending  |
+| PLAT-01     | Phase 2 | Pending  |
 | PLAT-02     | Phase 1 | Complete |
 | PLAT-03     | Phase 3 | Pending  |
 | PLAT-04     | Phase 7 | Pending  |
