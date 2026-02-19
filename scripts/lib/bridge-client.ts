@@ -8,7 +8,12 @@
  * Hook scripts own stdout for JSON output to Claude Code.
  */
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { loadConfig } from '../../src/config/loader.js';
+import { DEFAULT_TIMEOUTS } from '../../src/config/defaults.js';
+
+/** Event type keys corresponding to timeout configuration fields. */
+export type TimeoutEventType = keyof typeof DEFAULT_TIMEOUTS;
 
 /** Polling interval in milliseconds between response checks. */
 export const POLL_INTERVAL_MS = 2000;
@@ -22,6 +27,25 @@ export interface EscalationResult {
   responseJson?: string | null;
   fallbackAction?: string;
   [key: string]: unknown;
+}
+
+/**
+ * Read the timeout (in milliseconds) for a given event type from config.
+ *
+ * Loads `escalate.config.json` from `$CLAUDE_PROJECT_DIR` (or cwd),
+ * returning the configured timeout for the event type. Falls back to
+ * `DEFAULT_TIMEOUTS` when the config file is missing or invalid.
+ */
+export function readTimeoutMs(eventType: TimeoutEventType): number {
+  const projectDir = process.env['CLAUDE_PROJECT_DIR'] ?? process.cwd();
+  const configPath = resolve(projectDir, 'escalate.config.json');
+  const result = loadConfig(configPath);
+
+  if (result.success) {
+    return result.data.timeouts[eventType];
+  }
+
+  return DEFAULT_TIMEOUTS[eventType];
 }
 
 /**

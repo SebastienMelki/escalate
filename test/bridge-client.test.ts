@@ -8,7 +8,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { readPort, createEscalation, pollForResponse, POLL_INTERVAL_MS } from '../scripts/lib/bridge-client.js';
+import { readPort, createEscalation, pollForResponse, readTimeoutMs, POLL_INTERVAL_MS } from '../scripts/lib/bridge-client.js';
+import { DEFAULT_TIMEOUTS } from '../src/config/defaults.js';
 
 describe('bridge-client', () => {
   describe('readPort', () => {
@@ -166,6 +167,61 @@ describe('bridge-client', () => {
       const result = await pollForResponse(9999, 'esc-3', 100);
 
       expect(result.status).toBe('timed_out');
+    });
+  });
+
+  describe('readTimeoutMs', () => {
+    let tempDir: string;
+
+    afterEach(() => {
+      if (tempDir) {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
+      vi.unstubAllEnvs();
+    });
+
+    it('returns default timeout when config file is missing', () => {
+      tempDir = join(tmpdir(), `escalate-timeout-test-${String(Date.now())}-missing`);
+      mkdirSync(tempDir, { recursive: true });
+      vi.stubEnv('CLAUDE_PROJECT_DIR', tempDir);
+
+      const timeout = readTimeoutMs('permissionRequest');
+      expect(timeout).toBe(DEFAULT_TIMEOUTS.permissionRequest);
+      expect(timeout).toBe(600_000);
+    });
+
+    it('returns custom timeout from config file', () => {
+      tempDir = join(tmpdir(), `escalate-timeout-test-${String(Date.now())}-custom`);
+      mkdirSync(tempDir, { recursive: true });
+      writeFileSync(
+        join(tempDir, 'escalate.config.json'),
+        JSON.stringify({
+          slack: { channelId: 'C0123456789' },
+          timeouts: { permissionRequest: 120_000 },
+        }),
+        'utf-8',
+      );
+      vi.stubEnv('CLAUDE_PROJECT_DIR', tempDir);
+
+      const timeout = readTimeoutMs('permissionRequest');
+      expect(timeout).toBe(120_000);
+    });
+
+    it('returns default for event type not explicitly in config timeouts', () => {
+      tempDir = join(tmpdir(), `escalate-timeout-test-${String(Date.now())}-partial`);
+      mkdirSync(tempDir, { recursive: true });
+      writeFileSync(
+        join(tempDir, 'escalate.config.json'),
+        JSON.stringify({
+          slack: { channelId: 'C0123456789' },
+        }),
+        'utf-8',
+      );
+      vi.stubEnv('CLAUDE_PROJECT_DIR', tempDir);
+
+      const timeout = readTimeoutMs('preToolUse');
+      expect(timeout).toBe(DEFAULT_TIMEOUTS.preToolUse);
+      expect(timeout).toBe(300_000);
     });
   });
 
