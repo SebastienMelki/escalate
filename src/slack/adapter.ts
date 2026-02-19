@@ -10,6 +10,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import { App, LogLevel } from '@slack/bolt';
+import type { KnownBlock } from '@slack/types';
 import type { MessagingAdapter } from '../types/adapter.js';
 import type { EscalationRequest, UserResponse } from '../types/escalation.js';
 import type { EscalationStore } from '../state/store.js';
@@ -234,6 +235,20 @@ export class SlackAdapter implements MessagingAdapter {
       channel: this.channelId,
       thread_ts: ts,
       text: message,
+    });
+  }
+
+  /**
+   * Send a session summary as a top-level channel message.
+   *
+   * This is NOT part of the MessagingAdapter interface -- it is Slack-specific.
+   * Posts Block Kit blocks directly to the configured channel (not a threaded reply).
+   */
+  async sendSummary(blocks: KnownBlock[]): Promise<void> {
+    await this.app.client.chat.postMessage({
+      channel: this.channelId,
+      blocks,
+      text: 'Session Summary', // fallback for notifications
     });
   }
 

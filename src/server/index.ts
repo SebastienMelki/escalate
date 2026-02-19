@@ -61,7 +61,8 @@ export async function startServer(options?: StartServerOptions): Promise<void> {
   const mcpServer = createMcpServer(store);
 
   // Create HTTP bridge with mutable options (adapter set after Slack init)
-  const bridgeOptions: HttpBridgeOptions = { store };
+  const auditLogPath = join(projectDir, '.claude', 'escalate-audit.jsonl');
+  const bridgeOptions: HttpBridgeOptions = { store, auditLogPath };
   httpServer = createHttpBridge(bridgeOptions);
 
   await new Promise<void>((resolve) => {

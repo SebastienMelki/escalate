@@ -7,25 +7,43 @@
  *
  * Routes:
  *   GET  /health          - Health check
- *   POST /escalations     - Create a pending escalation
+ *   POST /escalations     - Create a pending escalation (intelligence-aware)
  *   GET  /escalations/:id - Get escalation status
+ *   POST /summary         - Generate and send session summary
  *
  * When an optional MessagingAdapter is provided, POST /escalations triggers
  * a Slack message via adapter.sendEscalation() (fire-and-forget).
  *
+ * Intelligence pipeline (POST /escalations):
+ *   1. Re-read config for mid-session tuning
+ *   2. Evaluate auto-approval rules
+ *   3. Check quiet hours for non-critical events
+ *   4. Audit-log every decision
+ *   5. Auto-approve/suppress or escalate to Slack
+ *
  * CRITICAL: Never use console.log() in this file. The MCP server uses stdio,
  * so any stdout output corrupts the JSON-RPC protocol.
  */
+import { join } from 'node:path';
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from 'node:http';
+import type { KnownBlock } from '@slack/types';
 import type { EscalationStore } from '../state/store.js';
 import type { FallbackAction } from '../state/types.js';
 import type { MessagingAdapter } from '../types/adapter.js';
 import type { EscalationRequest, SuggestedAction } from '../types/escalation.js';
+import { evaluateRules, extractFilePaths } from '../intelligence/rules.js';
+import { isQuietHours, isCriticalEvent } from '../intelligence/quiet-hours.js';
+import { appendAuditEntry } from '../intelligence/audit.js';
+import { buildSessionSummary, buildSummaryBlocks } from '../intelligence/summary.js';
+import { loadConfig } from '../config/index.js';
+import { isOk } from '../errors/result.js';
+import type { EscalateConfig } from '../config/schema.js';
 
 /** Options for creating the HTTP bridge. Uses a mutable object so adapter can be set after creation. */
 export interface HttpBridgeOptions {
   store: EscalationStore;
   adapter?: MessagingAdapter;
+  auditLogPath?: string;
 }
 
 /**
@@ -104,6 +122,12 @@ function sendJson(res: ServerResponse, statusCode: number, data: unknown): void 
   res.end(JSON.stringify(data));
 }
 
+/** Default audit log path based on project directory. */
+function defaultAuditLogPath(): string {
+  const projectDir = process.env['CLAUDE_PROJECT_DIR'] ?? process.cwd();
+  return join(projectDir, '.claude', 'escalate-audit.jsonl');
+}
+
 /**
  * Create an HTTP bridge server backed by the given escalation store.
  *
@@ -129,7 +153,7 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
         return;
       }
 
-      // POST /escalations
+      // POST /escalations — intelligence-aware escalation pipeline
       if (req.method === 'POST' && url.pathname === '/escalations') {
         let body: unknown;
         try {
@@ -156,6 +180,103 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
           return;
         }
 
+        // Parse hook input for intelligence evaluation
+        const hookInput = JSON.parse(request_json) as Record<string, unknown>;
+        const toolName = hookInput['tool_name'] as string | undefined;
+        const filePaths = extractFilePaths(toolName, (hookInput['tool_input'] ?? {}) as Record<string, unknown>);
+
+        // Re-read config on every request for mid-session rule tuning
+        let config: EscalateConfig | undefined;
+        const configResult = loadConfig();
+        if (isOk(configResult)) {
+          config = configResult.data;
+        }
+
+        // Intelligence evaluation: determine whether to escalate, auto-approve, or suppress
+        let decision: 'escalate' | 'auto_approve' | 'quiet_hours_suppress' = 'escalate';
+        let reason = 'No config available, defaulting to escalate';
+        let matchedRuleDescription: string | undefined;
+
+        if (config) {
+          // Get escalation policy for event type (bracket notation for noPropertyAccessFromIndexSignature)
+          const policyMap: Record<string, string> = {
+            PermissionRequest: config.escalationPolicies.permissionRequest,
+            PreToolUse: config.escalationPolicies.preToolUse,
+            Stop: config.escalationPolicies.stop,
+            PostToolUseFailure: config.escalationPolicies.postToolUseFailure,
+          };
+          const policy = (policyMap[event_type] ?? 'always') as 'always' | 'conditional' | 'never';
+
+          // Evaluate auto-approval rules
+          const ruleResult = evaluateRules(
+            { eventType: event_type, ...(toolName !== undefined ? { toolName } : {}), filePaths },
+            config.autoApprovalRules,
+            policy,
+          );
+          decision = ruleResult.decision;
+          reason = ruleResult.reason;
+          matchedRuleDescription = ruleResult.matchedRule?.description;
+
+          // Check quiet hours for non-critical events that would be escalated
+          if (
+            decision === 'escalate' &&
+            isQuietHours(config.quietHours) &&
+            !isCriticalEvent(event_type, config.quietHours.criticalEvents)
+          ) {
+            decision = 'quiet_hours_suppress';
+            reason = 'Suppressed during quiet hours';
+          }
+        }
+
+        // Audit log every decision (failure must NOT block escalation)
+        const auditLogPath = options.auditLogPath ?? defaultAuditLogPath();
+        try {
+          appendAuditEntry(auditLogPath, {
+            timestamp: new Date().toISOString(),
+            eventType: event_type,
+            decision: decision === 'escalate' ? 'escalated' : decision === 'auto_approve' ? 'auto_approved' : 'quiet_hours_suppressed',
+            reason,
+            ...(toolName !== undefined ? { toolName } : {}),
+            ...(filePaths.length > 0 ? { filePaths } : {}),
+            ...(matchedRuleDescription !== undefined ? { matchedRule: matchedRuleDescription } : {}),
+          });
+        } catch (auditErr: unknown) {
+          console.error('[escalate] Audit log write failed (non-blocking):', auditErr);
+        }
+
+        // Auto-approved or quiet-hours-suppressed: create pre-resolved record, skip Slack
+        if (decision === 'auto_approve' || decision === 'quiet_hours_suppress') {
+          // Determine response action based on fallback policy
+          let responseAction = 'approve';
+          if (decision === 'quiet_hours_suppress' && config) {
+            const fallbackMap: Record<string, string> = {
+              PermissionRequest: config.fallbackActions.permissionRequest,
+              PreToolUse: config.fallbackActions.preToolUse,
+              Stop: config.fallbackActions.stop,
+              PostToolUseFailure: config.fallbackActions.postToolUseFailure,
+            };
+            const fallback = fallbackMap[event_type] ?? 'allow';
+            // Map fallback actions to response actions
+            if (fallback === 'deny') {
+              responseAction = 'deny';
+            } else {
+              // 'allow' and 'ask-again' both map to 'approve' (user not available during quiet hours)
+              responseAction = 'approve';
+            }
+          }
+
+          const record = store.create({
+            eventType: event_type,
+            requestJson: request_json,
+            fallbackAction: (fallback_action ?? 'deny') as FallbackAction,
+            timeoutSeconds: timeout_seconds ?? 600,
+          });
+          store.resolve(record.id, JSON.stringify({ type: 'action', actionId: responseAction }));
+          sendJson(res, 201, { escalation_id: record.id, status: 'resolved' });
+          return;
+        }
+
+        // Decision is 'escalate': proceed with existing flow
         const record = store.create({
           eventType: event_type,
           requestJson: request_json,
@@ -166,14 +287,12 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
         // Fire-and-forget Slack notification when adapter is available
         const adapter = options.adapter;
         if (adapter?.isConnected()) {
-          const hookInput = JSON.parse(request_json) as Record<string, unknown>;
-          const toolName = hookInput['tool_name'];
           const context: EscalationRequest['context'] = {
             eventType: event_type,
             ...(typeof toolName === 'string' ? { toolName } : {}),
           };
           const escalationRequest: EscalationRequest = {
-            title: `${event_type}: ${String(toolName ?? 'Unknown')}`,
+            title: `${event_type}: ${toolName ?? 'Unknown'}`,
             question: buildQuestionFromEvent(event_type, hookInput),
             urgency: event_type === 'PostToolUseFailure' ? 'warning' : 'critical',
             context,
@@ -206,6 +325,28 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
         }
 
         sendJson(res, 200, record);
+        return;
+      }
+
+      // POST /summary — session summary dispatch
+      if (req.method === 'POST' && url.pathname === '/summary') {
+        const auditLogPath = options.auditLogPath ?? defaultAuditLogPath();
+        const summary = buildSessionSummary(auditLogPath);
+        const blocks = buildSummaryBlocks(summary);
+
+        // Type-narrow adapter to check for Slack-specific sendSummary method
+        const adapter = options.adapter;
+        if (adapter && adapter.isConnected() && 'sendSummary' in adapter) {
+          try {
+            await (adapter as { sendSummary: (blocks: KnownBlock[]) => Promise<void> }).sendSummary(blocks);
+            sendJson(res, 200, { status: 'sent', summary });
+          } catch (summaryErr: unknown) {
+            console.error('[escalate] Failed to send summary:', summaryErr);
+            sendJson(res, 200, { status: 'error', summary });
+          }
+        } else {
+          sendJson(res, 200, { status: 'no_adapter', summary });
+        }
         return;
       }
 

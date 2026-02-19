@@ -10,7 +10,7 @@
 export interface AutoApprovalRule {
   readonly type: 'tool_name' | 'file_path';
   readonly pattern: string;
-  readonly description?: string;
+  readonly description?: string | undefined;
 }
 
 /** Input context for rule evaluation. */
