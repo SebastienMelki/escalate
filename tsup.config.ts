@@ -8,6 +8,7 @@ export default defineConfig({
     'scripts/on-pre-tool-use.ts',
     'scripts/on-stop.ts',
     'scripts/on-post-tool-failure.ts',
+    'scripts/on-task-completed.ts',
     'scripts/lib/bridge-client.ts',
   ],
   format: ['esm'],

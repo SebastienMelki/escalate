@@ -6,7 +6,7 @@
  * CRITICAL: No console.log() — stdout is owned by Claude Code for JSON output.
  */
 import { readFileSync } from 'node:fs';
-import { readPort, createEscalation, pollForResponse } from './lib/bridge-client.js';
+import { readPort, createEscalation, pollForResponse, requestSummary } from './lib/bridge-client.js';
 import { buildStopOutput } from './lib/output-helpers.js';
 
 async function main(): Promise<void> {
@@ -31,6 +31,10 @@ async function main(): Promise<void> {
   if (output) {
     process.stdout.write(output);
   }
+
+  // Fire-and-forget session summary after escalation resolution
+  void requestSummary(port).catch(() => {});
+
   process.exit(0);
 }
 

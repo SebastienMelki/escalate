@@ -95,3 +95,19 @@ export async function pollForResponse(
 
   return { status: 'timed_out' };
 }
+
+/**
+ * Request a session summary from the HTTP bridge.
+ *
+ * POSTs to /summary and returns the status. Best-effort -- callers should
+ * catch errors rather than letting them propagate.
+ */
+export async function requestSummary(port: number): Promise<{ status: string }> {
+  const res = await fetch(`http://127.0.0.1:${String(port)}/summary`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: '{}',
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  return (await res.json()) as { status: string };
+}
