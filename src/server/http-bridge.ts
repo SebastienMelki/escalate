@@ -229,20 +229,22 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
           }
         }
 
-        // Audit log every decision (failure must NOT block escalation)
-        const auditLogPath = options.auditLogPath ?? defaultAuditLogPath();
-        try {
-          appendAuditEntry(auditLogPath, {
-            timestamp: new Date().toISOString(),
-            eventType: event_type,
-            decision: decision === 'escalate' ? 'escalated' : decision === 'auto_approve' ? 'auto_approved' : 'quiet_hours_suppressed',
-            reason,
-            ...(toolName !== undefined ? { toolName } : {}),
-            ...(filePaths.length > 0 ? { filePaths } : {}),
-            ...(matchedRuleDescription !== undefined ? { matchedRule: matchedRuleDescription } : {}),
-          });
-        } catch (auditErr: unknown) {
-          console.error('[escalate] Audit log write failed (non-blocking):', auditErr);
+        // Audit log every decision (respects auditLog.enabled config, defaults to true)
+        if (config?.auditLog.enabled ?? true) {
+          const auditLogPath = options.auditLogPath ?? defaultAuditLogPath();
+          try {
+            appendAuditEntry(auditLogPath, {
+              timestamp: new Date().toISOString(),
+              eventType: event_type,
+              decision: decision === 'escalate' ? 'escalated' : decision === 'auto_approve' ? 'auto_approved' : 'quiet_hours_suppressed',
+              reason,
+              ...(toolName !== undefined ? { toolName } : {}),
+              ...(filePaths.length > 0 ? { filePaths } : {}),
+              ...(matchedRuleDescription !== undefined ? { matchedRule: matchedRuleDescription } : {}),
+            });
+          } catch (auditErr: unknown) {
+            console.error('[escalate] Audit log write failed (non-blocking):', auditErr);
+          }
         }
 
         // Auto-approved or quiet-hours-suppressed: create pre-resolved record, skip Slack
