@@ -21,7 +21,7 @@ import type { EscalationStore } from '../state/store.js';
  */
 export function createMcpServer(store: EscalationStore): McpServer {
   const server = new McpServer(
-    { name: 'escalate', version: '0.1.0' },
+    { name: 'escalate', version: '1.0.0' },
     { capabilities: { tools: {} } },
   );
 
