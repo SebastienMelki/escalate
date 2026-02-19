@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Run GSD end-to-end autonomously, escalating to the human through their phone only when a decision, approval, or intervention is actually required.
-**Current focus:** All phases complete
+**Current focus:** Gap closure phases complete
 
 ## Current Position
 
-Phase: 7 of 7 (Plugin Packaging)
-Plan: 2 of 2 in current phase
+Phase: 8 of 8 (Fix UUID Mismatch)
+Plan: 1 of 1 in current phase
 Status: Complete
-Last activity: 2026-02-19 — Completed 07-02-PLAN.md
+Last activity: 2026-02-19 — Completed 08-01-PLAN.md
 
 Progress: [████████████████] 100%
 
@@ -20,9 +20,9 @@ Progress: [████████████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 5min
-- Total execution time: 1.4 hours
+- Total execution time: 1.45 hours
 
 **By Phase:**
 
@@ -35,10 +35,11 @@ Progress: [████████████████] 100%
 | 5-Escalation Intelligence    | 3/3   | 15min | 5min     |
 | 6-Multimodal Responses       | 2/2   | 9min  | 4.5min   |
 | 7-Plugin Packaging           | 2/2   | 16min | 8min     |
+| 8-Fix UUID Mismatch          | 1/1   | 3min  | 3min     |
 
 **Recent Trend:**
 
-- Last 5 plans: 05-03 (5min), 06-01 (4min), 06-02 (5min), 07-01 (12min), 07-02 (4min)
+- Last 5 plans: 06-01 (4min), 06-02 (5min), 07-01 (12min), 07-02 (4min), 08-01 (3min)
 - Trend: Stable
 
 _Updated after each plan completion_
@@ -46,6 +47,7 @@ _Updated after each plan completion_
 | Phase 06 P02 | 5min | 2 tasks | 5 files |
 | Phase 07 P01 | 12min | 2 tasks | 9 files |
 | Phase 07 P02 | 4min | 2 tasks | 7 files |
+| Phase 08 P01 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -106,6 +108,8 @@ Recent decisions affecting current work:
 - [07-01]: onSuccess post-build hook patches bare sqlite imports back to node:sqlite (esbuild strips prefix)
 - [07-02]: --no-warnings=ExperimentalWarning in .mcp.json args to suppress node:sqlite experimental warning on stderr
 - [07-02]: Fixed pre-existing lint errors across 5 files to ensure full quality gate passes for distribution-ready plugin
+- [08-01]: Optional id field on EscalationRequest with request.id ?? randomUUID() fallback preserves backward compatibility
+- [08-01]: No id: undefined anywhere due to exactOptionalPropertyTypes -- http-bridge always has record.id as a string
 
 ### Pending Todos
 
@@ -119,5 +123,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 07-02-PLAN.md (Plugin manifest & distribution validation -- all 7 phases complete)
-Resume file: .planning/phases/07-plugin-packaging/07-02-SUMMARY.md
+Stopped at: Completed 08-01-PLAN.md (Fix UUID mismatch -- escalation round-trip now uses single ID)
+Resume file: .planning/phases/08-fix-uuid-mismatch/08-01-SUMMARY.md
