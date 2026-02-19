@@ -1,5 +1,10 @@
 {
   "name": "escalate",
-  "version": "0.1.0",
-  "description": "Smart escalation bridge between Claude Code and messaging platforms"
+  "version": "1.0.0",
+  "description": "Smart escalation bridge between Claude Code and Slack -- routes decisions, approvals, and notifications to your phone",
+  "author": {
+    "name": "Kompani"
+  },
+  "license": "MIT",
+  "keywords": ["slack", "escalation", "notifications", "approval", "hooks"]
 }

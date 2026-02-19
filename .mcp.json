@@ -2,7 +2,7 @@
   "mcpServers": {
     "escalate": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/server/index.js"],
+      "args": ["--no-warnings=ExperimentalWarning", "${CLAUDE_PLUGIN_ROOT}/dist/server/index.js"],
       "env": {
         "CLAUDE_PROJECT_DIR": "${CLAUDE_PROJECT_DIR}"
       }
