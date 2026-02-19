@@ -18,8 +18,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Slack Messaging
 
 - [x] **SLCK-01**: Escalation messages use Slack Block Kit formatting with structured layout (title, context, question, options)
-- [x] **SLCK-02**: Messages include interactive Approve/Deny/Snooze buttons for binary and multi-choice decisions
-- [x] **SLCK-03**: Messages include rich GSD context — current phase, task name, what Claude was about to do, and why it needs a decision
+- [ ] **SLCK-02**: Messages include interactive Approve/Deny/Snooze buttons for binary and multi-choice decisions
+- [ ] **SLCK-03**: Messages include rich GSD context — current phase, task name, what Claude was about to do, and why it needs a decision
 - [x] **SLCK-04**: MCP server maintains persistent Socket Mode WebSocket connection (no public URL required)
 - [x] **SLCK-05**: Follow-up context and status updates appear as threaded replies under the original escalation message
 - [x] **SLCK-06**: User can respond with free-form text in thread and Claude receives it as context
@@ -46,7 +46,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **INTL-02**: Auto-approval rules match file path patterns (e.g., auto-approve writes to test files)
 - [x] **INTL-03**: Audit log — append-only JSON file recording every escalation: timestamp, event type, message sent, response received, decision applied
 - [x] **INTL-04**: Quiet hours — time-based escalation suppression with configurable schedule and timezone; only critical escalations (PermissionRequest, Stop) during quiet hours
-- [x] **INTL-05**: Session summary DM on TaskCompleted or Stop — phases completed, decisions made, notable events
+- [ ] **INTL-05**: Session summary DM on TaskCompleted or Stop — phases completed, decisions made, notable events
 
 ### Multimodal
 
@@ -110,8 +110,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HOOK-04     | Phase 4 | Complete |
 | HOOK-05     | Phase 4 | Complete |
 | SLCK-01     | Phase 3 | Complete |
-| SLCK-02     | Phase 3 | Complete |
-| SLCK-03     | Phase 3 | Complete |
+| SLCK-02     | Phase 12 | Pending |
+| SLCK-03     | Phase 12 | Pending |
 | SLCK-04     | Phase 3 | Complete |
 | SLCK-05     | Phase 3 | Complete |
 | SLCK-06     | Phase 8 | Complete |
@@ -129,7 +129,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTL-02     | Phase 5 | Complete |
 | INTL-03     | Phase 9 | Complete |
 | INTL-04     | Phase 5 | Complete |
-| INTL-05     | Phase 5 | Complete |
+| INTL-05     | Phase 12 | Pending |
 | MDIA-01     | Phase 10 | Complete |
 | MDIA-02     | Phase 10 | Complete |
 | PLAT-01     | Phase 2 | Complete |
@@ -144,7 +144,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v1 requirements: 34 total
 - Mapped to phases: 34
 - Complete: 31
-- Pending (gap closure): 3 (2 in Phase 10, 1 in Phase 11)
+- Pending (gap closure): 3 (INTL-05, SLCK-02, SLCK-03 in Phase 12)
 - Unmapped: 0
 
 ---
