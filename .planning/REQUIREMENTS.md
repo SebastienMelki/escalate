@@ -17,9 +17,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Slack Messaging
 
-- [ ] **SLCK-01**: Escalation messages use Slack Block Kit formatting with structured layout (title, context, question, options)
-- [ ] **SLCK-02**: Messages include interactive Approve/Deny/Snooze buttons for binary and multi-choice decisions
-- [ ] **SLCK-03**: Messages include rich GSD context — current phase, task name, what Claude was about to do, and why it needs a decision
+- [x] **SLCK-01**: Escalation messages use Slack Block Kit formatting with structured layout (title, context, question, options)
+- [x] **SLCK-02**: Messages include interactive Approve/Deny/Snooze buttons for binary and multi-choice decisions
+- [x] **SLCK-03**: Messages include rich GSD context — current phase, task name, what Claude was about to do, and why it needs a decision
 - [ ] **SLCK-04**: MCP server maintains persistent Socket Mode WebSocket connection (no public URL required)
 - [ ] **SLCK-05**: Follow-up context and status updates appear as threaded replies under the original escalation message
 - [ ] **SLCK-06**: User can respond with free-form text in thread and Claude receives it as context
@@ -109,9 +109,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HOOK-03     | Phase 4 | Pending  |
 | HOOK-04     | Phase 4 | Pending  |
 | HOOK-05     | Phase 4 | Pending  |
-| SLCK-01     | Phase 3 | Pending  |
-| SLCK-02     | Phase 3 | Pending  |
-| SLCK-03     | Phase 3 | Pending  |
+| SLCK-01     | Phase 3 | Complete |
+| SLCK-02     | Phase 3 | Complete |
+| SLCK-03     | Phase 3 | Complete |
 | SLCK-04     | Phase 3 | Pending  |
 | SLCK-05     | Phase 3 | Pending  |
 | SLCK-06     | Phase 3 | Pending  |

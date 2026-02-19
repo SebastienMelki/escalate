@@ -5,24 +5,24 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Run GSD end-to-end autonomously, escalating to the human through their phone only when a decision, approval, or intervention is actually required.
-**Current focus:** Phase 2: State Store & IPC Bridge
+**Current focus:** Phase 3: Slack Adapter
 
 ## Current Position
 
-Phase: 2 of 7 (State Store & IPC Bridge)
-Plan: 2 of 2 in current phase
-Status: Phase Complete
-Last activity: 2026-02-19 — Completed 02-02-PLAN.md
+Phase: 3 of 7 (Slack Adapter)
+Plan: 1 of 2 in current phase
+Status: In Progress
+Last activity: 2026-02-19 — Completed 03-01-PLAN.md
 
-Progress: [████░░░░░░] 29%
+Progress: [████░░░░░░] 35%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 5min
-- Total execution time: 0.38 hours
+- Total execution time: 0.48 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: [████░░░░░░] 29%
 | ---------------------------- | ----- | ----- | -------- |
 | 1-Foundation                 | 3/3   | 12min | 4min     |
 | 2-State Store & IPC Bridge   | 2/2   | 11min | 5min     |
+| 3-Slack Adapter              | 1/2   | 6min  | 6min     |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (7min), 01-02 (4min), 01-03 (1min), 02-01 (6min), 02-02 (5min)
+- Last 5 plans: 01-02 (4min), 01-03 (1min), 02-01 (6min), 02-02 (5min), 03-01 (6min)
 - Trend: Stable
 
 _Updated after each plan completion_
@@ -60,6 +61,9 @@ Recent decisions affecting current work:
 - [02-02]: HTTP bridge uses raw Node.js http.createServer -- no framework for 3 localhost routes
 - [02-02]: Auto-start guard uses fileURLToPath + process.argv[1] to prevent server launch on library import
 - [02-02]: Port file written synchronously before accepting connections for race-free discovery
+- [03-01]: Added @slack/types as direct dev dependency for clean type imports (pnpm strict hoisting blocks transitive access)
+- [03-01]: Used MrkdwnElement[] for context elements and conditional spread for button style omission
+- [03-01]: Pure-function Block Kit builder pattern: stateless, easily testable without Slack connection
 
 ### Pending Todos
 
@@ -73,5 +77,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 02-02-PLAN.md (MCP server + HTTP bridge + server entrypoint)
-Resume file: .planning/phases/02-state-store-and-ipc-bridge/02-02-SUMMARY.md
+Stopped at: Completed 03-01-PLAN.md (Slack types + Block Kit builder + 15 unit tests)
+Resume file: .planning/phases/03-slack-adapter/03-01-SUMMARY.md

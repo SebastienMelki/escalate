@@ -58,8 +58,8 @@ Plans:
 
 Plans:
 
-- [ ] 02-01-PLAN.md — SQLite state store with escalation CRUD, fallback decision config (TDD)
-- [ ] 02-02-PLAN.md — MCP server (stdio), HTTP bridge, server entrypoint, plugin config
+- [x] 02-01-PLAN.md — SQLite state store with escalation CRUD, fallback decision config (TDD)
+- [x] 02-02-PLAN.md — MCP server (stdio), HTTP bridge, server entrypoint, plugin config
 
 ### Phase 3: Slack Adapter
 
@@ -77,7 +77,7 @@ Plans:
 
 Plans:
 
-- [ ] 03-01-PLAN.md — Block Kit message builder, Slack types, and unit tests
+- [x] 03-01-PLAN.md — Block Kit message builder, Slack types, and unit tests
 - [ ] 03-02-PLAN.md — SlackAdapter class, handlers, server integration, startup validation
 
 ### Phase 4: Hook Scripts and Escalation Loop
@@ -161,8 +161,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | Phase                               | Plans Complete | Status      | Completed |
 | ----------------------------------- | -------------- | ----------- | --------- |
 | 1. Foundation                       | 3/3            | Complete    | 2026-02-18 |
-| 2. State Store and IPC Bridge       | 0/2            | Complete    | 2026-02-19 |
-| 3. Slack Adapter                    | 0/2            | Not started | -         |
+| 2. State Store and IPC Bridge       | 2/2            | Complete    | 2026-02-19 |
+| 3. Slack Adapter                    | 1/2            | In Progress | -         |
 | 4. Hook Scripts and Escalation Loop | 0/3            | Not started | -         |
 | 5. Escalation Intelligence          | 0/3            | Not started | -         |
 | 6. Multimodal Responses             | 0/2            | Not started | -         |
