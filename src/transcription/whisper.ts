@@ -29,7 +29,7 @@ export class WhisperTranscriptionProvider implements TranscriptionProvider {
 
     return {
       text: result.text,
-      ...(result.duration != null ? { durationMs: result.duration * 1000 } : {}),
+      durationMs: result.duration * 1000,
     };
   }
 }

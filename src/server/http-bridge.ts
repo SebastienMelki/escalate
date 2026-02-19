@@ -52,7 +52,8 @@ export interface HttpBridgeOptions {
  * Each event type produces a contextual question that makes sense in Slack.
  */
 function buildQuestionFromEvent(eventType: string, input: Record<string, unknown>): string {
-  const toolName = String(input['tool_name'] ?? 'Unknown');
+  const rawToolName = input['tool_name'];
+  const toolName = typeof rawToolName === 'string' ? rawToolName : 'Unknown';
   const toolInput = JSON.stringify(input['tool_input'] ?? {}).slice(0, 200);
   const lastMessage = input['last_assistant_message'];
   const error = input['error'];

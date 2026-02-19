@@ -43,7 +43,7 @@ export default defineConfig({
   noExternal: [/^(?!node:)/],
   // Fix esbuild stripping node: prefix from node:sqlite imports.
   // node:sqlite is the only builtin that requires the prefix.
-  onSuccess: async () => {
+  onSuccess: () => {
     patchSqliteImports('dist');
   },
 });

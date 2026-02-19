@@ -15,7 +15,7 @@ describe('bridge-client', () => {
     let tempDir: string;
 
     beforeEach(() => {
-      tempDir = join(tmpdir(), `escalate-test-${Date.now()}`);
+      tempDir = join(tmpdir(), `escalate-test-${String(Date.now())}`);
       mkdirSync(join(tempDir, '.claude'), { recursive: true });
     });
 
@@ -81,11 +81,13 @@ describe('bridge-client', () => {
       const fetchMock = vi.mocked(globalThis.fetch);
       expect(fetchMock).toHaveBeenCalledOnce();
 
-      const [url, options] = fetchMock.mock.calls[0]!;
+      const call = fetchMock.mock.calls[0];
+      expect(call).toBeDefined();
+      const [url, options] = call as [string, RequestInit];
       expect(url).toBe('http://127.0.0.1:9999/escalations');
-      expect((options as RequestInit).method).toBe('POST');
+      expect(options.method).toBe('POST');
 
-      const sentBody = JSON.parse((options as RequestInit).body as string) as Record<string, unknown>;
+      const sentBody = JSON.parse(options.body as string) as Record<string, unknown>;
       expect(sentBody).toEqual({
         event_type: 'PermissionRequest',
         request_json: '{"tool_name":"Bash"}',

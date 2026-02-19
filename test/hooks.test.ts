@@ -104,7 +104,9 @@ describe('hook output helpers', () => {
         responseJson: JSON.stringify({ type: 'action', actionId: 'continue' }),
       };
 
-      const output = JSON.parse(buildStopOutput(result)!) as Record<string, unknown>;
+      const raw = buildStopOutput(result);
+      expect(raw).not.toBeNull();
+      const output = JSON.parse(raw as string) as Record<string, unknown>;
 
       expect(output).toEqual({
         decision: 'block',
@@ -118,7 +120,9 @@ describe('hook output helpers', () => {
         responseJson: JSON.stringify({ type: 'text', text: 'Please finish the tests first' }),
       };
 
-      const output = JSON.parse(buildStopOutput(result)!) as Record<string, unknown>;
+      const raw = buildStopOutput(result);
+      expect(raw).not.toBeNull();
+      const output = JSON.parse(raw as string) as Record<string, unknown>;
 
       expect(output).toEqual({
         decision: 'block',
