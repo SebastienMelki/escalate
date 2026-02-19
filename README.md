@@ -34,7 +34,8 @@ Create a Slack app with these permissions:
 
 **Bot Token Scopes:**
 - `chat:write` - Send messages
-- `reactions:read` - Read emoji reactions (future)
+- `reactions:read` - Read emoji reactions
+- `files:read` - Download voice note attachments
 
 **Socket Mode:** Enable Socket Mode and generate an app-level token with `connections:write` scope.
 
@@ -61,9 +62,14 @@ pnpm build
 Set these in your shell or `.env` (never commit secrets):
 
 ```bash
-export SLACK_BOT_TOKEN="xoxb-..."       # Bot User OAuth Token
-export SLACK_APP_TOKEN="xapp-..."       # App-Level Token (Socket Mode)
-export SLACK_SIGNING_SECRET="..."       # Signing Secret (from Basic Information)
+export ESCALATE_SLACK_BOT_TOKEN="xoxb-..."       # Bot User OAuth Token
+export ESCALATE_SLACK_APP_TOKEN="xapp-..."       # App-Level Token (Socket Mode)
+```
+
+Optional (only needed for voice note transcription):
+
+```bash
+export ESCALATE_OPENAI_API_KEY="sk-..."       # OpenAI API key for Whisper
 ```
 
 ### Config File
@@ -151,9 +157,11 @@ pnpm format
 - [x] **Phase 2:** State Store & IPC Bridge (SQLite, MCP server, HTTP bridge)
 - [x] **Phase 3:** Slack Adapter (Socket Mode, Block Kit, interactive buttons)
 - [x] **Phase 4:** Hook Scripts & Escalation Loop (end-to-end event flow)
-- [ ] **Phase 5:** Escalation Intelligence (auto-approval rules, quiet hours, audit logging)
-- [ ] **Phase 6:** Multimodal Responses (voice notes, emoji reactions)
-- [ ] **Phase 7:** Plugin Packaging (self-contained distribution)
+- [x] **Phase 5:** Escalation Intelligence (auto-approval rules, quiet hours, audit logging)
+- [x] **Phase 6:** Multimodal Responses (voice notes, emoji reactions)
+- [x] **Phase 7:** Plugin Packaging (self-contained distribution)
+- [x] **Phase 8:** UUID Fix (escalation round-trip ID consistency)
+- [x] **Phase 9:** Config & Manifest Fixes (env vars, audit gate, version sync)
 
 ## License
 

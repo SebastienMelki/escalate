@@ -4,7 +4,10 @@
       "command": "node",
       "args": ["--no-warnings=ExperimentalWarning", "${CLAUDE_PLUGIN_ROOT}/dist/server/index.js"],
       "env": {
-        "CLAUDE_PROJECT_DIR": "${CLAUDE_PROJECT_DIR}"
+        "CLAUDE_PROJECT_DIR": "${CLAUDE_PROJECT_DIR}",
+        "ESCALATE_SLACK_BOT_TOKEN": "${ESCALATE_SLACK_BOT_TOKEN}",
+        "ESCALATE_SLACK_APP_TOKEN": "${ESCALATE_SLACK_APP_TOKEN}",
+        "ESCALATE_OPENAI_API_KEY": "${ESCALATE_OPENAI_API_KEY}"
       }
     }
   }
