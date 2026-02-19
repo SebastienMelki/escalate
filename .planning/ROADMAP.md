@@ -202,6 +202,11 @@ Plans:
 1. A `type:'reaction'` response with `actionId:'approve'` produces an ALLOW decision (exit 0) for PermissionRequest/PreToolUse hooks
 2. A `type:'voice'` response with transcribed text produces an ALLOW decision when text indicates approval, and routes text as context for Stop hooks
 3. Both emoji reaction and voice note approval flows complete the full round-trip: Slack → store.resolve → hook poll → correct exit code
+   **Plans**: 1 plan
+
+Plans:
+
+- [ ] 10-01-PLAN.md — Add reaction/voice type handling to output-helpers.ts with comprehensive tests
 
 ### Phase 11: Read Hook Timeouts from Config
 
