@@ -17,7 +17,7 @@ import Database from 'better-sqlite3';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { EscalationStore } from '../state/store.js';
 import { createMcpServer } from './mcp-server.js';
-import { createHttpBridge } from './http-bridge.js';
+import { createHttpBridge, type HttpBridgeOptions } from './http-bridge.js';
 import { SlackAdapter } from '../slack/adapter.js';
 import { loadConfig, loadSecrets } from '../config/index.js';
 import { isOk } from '../errors/result.js';
@@ -60,8 +60,9 @@ export async function startServer(options?: StartServerOptions): Promise<void> {
   // Create MCP server
   const mcpServer = createMcpServer(store);
 
-  // Create and start HTTP bridge
-  httpServer = createHttpBridge(store);
+  // Create HTTP bridge with mutable options (adapter set after Slack init)
+  const bridgeOptions: HttpBridgeOptions = { store };
+  httpServer = createHttpBridge(bridgeOptions);
 
   await new Promise<void>((resolve) => {
     httpServer?.listen(options?.port ?? 0, '127.0.0.1', () => {
@@ -98,6 +99,9 @@ export async function startServer(options?: StartServerOptions): Promise<void> {
     try {
       await slackAdapter.start();
       await slackAdapter.validateAndAnnounce();
+
+      // Wire Slack adapter into HTTP bridge for escalation dispatch
+      bridgeOptions.adapter = slackAdapter;
     } catch (error: unknown) {
       console.error('[escalate] Slack adapter failed to start:', error);
       // Don't crash the MCP server -- Slack is optional

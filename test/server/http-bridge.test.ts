@@ -19,7 +19,7 @@ describe('HTTP Bridge', () => {
   beforeAll(async () => {
     db = new Database(':memory:');
     store = new EscalationStore(db);
-    server = createHttpBridge(store);
+    server = createHttpBridge({ store });
 
     await new Promise<void>((resolve) => {
       server.listen(0, '127.0.0.1', () => {

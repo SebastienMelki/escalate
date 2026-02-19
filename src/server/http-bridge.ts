@@ -10,12 +10,76 @@
  *   POST /escalations     - Create a pending escalation
  *   GET  /escalations/:id - Get escalation status
  *
+ * When an optional MessagingAdapter is provided, POST /escalations triggers
+ * a Slack message via adapter.sendEscalation() (fire-and-forget).
+ *
  * CRITICAL: Never use console.log() in this file. The MCP server uses stdio,
  * so any stdout output corrupts the JSON-RPC protocol.
  */
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from 'node:http';
 import type { EscalationStore } from '../state/store.js';
 import type { FallbackAction } from '../state/types.js';
+import type { MessagingAdapter } from '../types/adapter.js';
+import type { EscalationRequest, SuggestedAction } from '../types/escalation.js';
+
+/** Options for creating the HTTP bridge. Uses a mutable object so adapter can be set after creation. */
+export interface HttpBridgeOptions {
+  store: EscalationStore;
+  adapter?: MessagingAdapter;
+}
+
+/**
+ * Build a human-readable question from a hook event type and input data.
+ *
+ * Each event type produces a contextual question that makes sense in Slack.
+ */
+function buildQuestionFromEvent(eventType: string, input: Record<string, unknown>): string {
+  const toolName = String(input['tool_name'] ?? 'Unknown');
+  const toolInput = JSON.stringify(input['tool_input'] ?? {}).slice(0, 200);
+  const lastMessage = input['last_assistant_message'];
+  const error = input['error'];
+
+  switch (eventType) {
+    case 'PermissionRequest':
+      return `Allow ${toolName}? ${toolInput}`;
+    case 'PreToolUse':
+      return `Allow ${toolName} before execution? ${toolInput}`;
+    case 'Stop':
+      return `Claude wants to stop. ${typeof lastMessage === 'string' ? lastMessage.slice(0, 200) : 'No context.'}`;
+    case 'PostToolUseFailure':
+      return `Tool failure: ${toolName} — ${typeof error === 'string' ? error.slice(0, 200) : 'Unknown error'}`;
+    default:
+      return `Event: ${eventType}`;
+  }
+}
+
+/**
+ * Build suggested action buttons appropriate for the event type.
+ *
+ * Returns a set of buttons that make sense for the user to click in Slack.
+ */
+function buildActionsForEvent(eventType: string): SuggestedAction[] {
+  switch (eventType) {
+    case 'PermissionRequest':
+    case 'PreToolUse':
+      return [
+        { id: 'approve', label: 'Approve', style: 'primary' },
+        { id: 'deny', label: 'Deny', style: 'danger' },
+      ];
+    case 'Stop':
+      return [
+        { id: 'stop', label: 'Stop', style: 'danger' },
+        { id: 'continue', label: 'Continue', style: 'primary' },
+      ];
+    case 'PostToolUseFailure':
+      return [{ id: 'acknowledge', label: 'Acknowledged' }];
+    default:
+      return [
+        { id: 'approve', label: 'Approve', style: 'primary' },
+        { id: 'deny', label: 'Deny', style: 'danger' },
+      ];
+  }
+}
 
 /** Parse JSON body from an incoming HTTP request. */
 function parseJsonBody(req: IncomingMessage): Promise<unknown> {
@@ -45,8 +109,13 @@ function sendJson(res: ServerResponse, statusCode: number, data: unknown): void 
  *
  * The server binds to 127.0.0.1 only (no external access).
  * Caller is responsible for calling `.listen()` on the returned server.
+ *
+ * The options object is mutable: `options.adapter` can be set after creation
+ * and the request handler will pick it up at request time (not creation time).
  */
-export function createHttpBridge(store: EscalationStore): Server {
+export function createHttpBridge(options: HttpBridgeOptions): Server {
+  const { store } = options;
+
   /** Handle an incoming HTTP request. */
   async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const host = req.headers.host ?? 'localhost';
@@ -93,6 +162,28 @@ export function createHttpBridge(store: EscalationStore): Server {
           fallbackAction: (fallback_action ?? 'deny') as FallbackAction,
           timeoutSeconds: timeout_seconds ?? 600,
         });
+
+        // Fire-and-forget Slack notification when adapter is available
+        const adapter = options.adapter;
+        if (adapter?.isConnected()) {
+          const hookInput = JSON.parse(request_json) as Record<string, unknown>;
+          const toolName = hookInput['tool_name'];
+          const context: EscalationRequest['context'] = {
+            eventType: event_type,
+            ...(typeof toolName === 'string' ? { toolName } : {}),
+          };
+          const escalationRequest: EscalationRequest = {
+            title: `${event_type}: ${String(toolName ?? 'Unknown')}`,
+            question: buildQuestionFromEvent(event_type, hookInput),
+            urgency: event_type === 'PostToolUseFailure' ? 'warning' : 'critical',
+            context,
+            suggestedActions: buildActionsForEvent(event_type),
+            allowFreeformResponse: true,
+          };
+          void adapter.sendEscalation(escalationRequest).catch((err: unknown) => {
+            console.error('[escalate] Failed to send Slack escalation:', err);
+          });
+        }
 
         sendJson(res, 201, {
           escalation_id: record.id,
