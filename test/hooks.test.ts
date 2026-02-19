@@ -53,6 +53,42 @@ describe('hook output helpers', () => {
       expect(specific.decision.behavior).toBe('deny');
       expect(specific.decision.message).toContain('Escalate');
     });
+
+    it('returns allow decision when user approves via emoji reaction', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'reaction', emoji: 'thumbsup', actionId: 'approve' }),
+      };
+
+      const output = JSON.parse(buildPermissionRequestOutput(result)) as Record<string, unknown>;
+      const specific = (output as { hookSpecificOutput: { decision: { behavior: string } } }).hookSpecificOutput;
+
+      expect(specific.decision.behavior).toBe('allow');
+    });
+
+    it('returns deny decision when user denies via emoji reaction', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'reaction', emoji: 'x', actionId: 'deny' }),
+      };
+
+      const output = JSON.parse(buildPermissionRequestOutput(result)) as Record<string, unknown>;
+      const specific = (output as { hookSpecificOutput: { decision: { behavior: string } } }).hookSpecificOutput;
+
+      expect(specific.decision.behavior).toBe('deny');
+    });
+
+    it('returns deny for voice note without actionId (conservative default)', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'voice', text: 'sounds good to me' }),
+      };
+
+      const output = JSON.parse(buildPermissionRequestOutput(result)) as Record<string, unknown>;
+      const specific = (output as { hookSpecificOutput: { decision: { behavior: string } } }).hookSpecificOutput;
+
+      expect(specific.decision.behavior).toBe('deny');
+    });
   });
 
   describe('buildPreToolUseOutput', () => {
@@ -94,6 +130,46 @@ describe('hook output helpers', () => {
 
       expect(specific.permissionDecision).toBe('deny');
       expect(specific.permissionDecisionReason).toContain('Escalate');
+    });
+
+    it('returns allow when user approves via emoji reaction', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'reaction', emoji: 'thumbsup', actionId: 'approve' }),
+      };
+
+      const output = JSON.parse(buildPreToolUseOutput(result)) as Record<string, unknown>;
+
+      expect(output).toEqual({
+        hookSpecificOutput: {
+          hookEventName: 'PreToolUse',
+          permissionDecision: 'allow',
+        },
+      });
+    });
+
+    it('returns deny when user denies via emoji reaction', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'reaction', emoji: 'x', actionId: 'deny' }),
+      };
+
+      const output = JSON.parse(buildPreToolUseOutput(result)) as Record<string, unknown>;
+      const specific = (output as { hookSpecificOutput: { permissionDecision: string } }).hookSpecificOutput;
+
+      expect(specific.permissionDecision).toBe('deny');
+    });
+
+    it('returns deny for voice note without actionId', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'voice', text: 'go ahead' }),
+      };
+
+      const output = JSON.parse(buildPreToolUseOutput(result)) as Record<string, unknown>;
+      const specific = (output as { hookSpecificOutput: { permissionDecision: string } }).hookSpecificOutput;
+
+      expect(specific.permissionDecision).toBe('deny');
     });
   });
 
@@ -143,6 +219,72 @@ describe('hook output helpers', () => {
       };
 
       expect(buildStopOutput(result)).toBeNull();
+    });
+
+    it('returns block when emoji reaction maps to continue', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'reaction', emoji: 'thumbsup', actionId: 'continue' }),
+      };
+
+      const raw = buildStopOutput(result);
+      expect(raw).not.toBeNull();
+      const output = JSON.parse(raw as string) as Record<string, unknown>;
+
+      expect(output).toEqual({
+        decision: 'block',
+        reason: 'User wants to continue via Escalate',
+      });
+    });
+
+    it('returns null (allow stop) when emoji reaction is not continue', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'reaction', emoji: 'x', actionId: 'deny' }),
+      };
+
+      expect(buildStopOutput(result)).toBeNull();
+    });
+
+    it('returns null (allow stop) when emoji reaction maps to approve', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'reaction', emoji: 'white_check_mark', actionId: 'approve' }),
+      };
+
+      expect(buildStopOutput(result)).toBeNull();
+    });
+
+    it('returns block with transcribed text from voice note', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'voice', text: 'keep going, finish the tests' }),
+      };
+
+      const raw = buildStopOutput(result);
+      expect(raw).not.toBeNull();
+      const output = JSON.parse(raw as string) as Record<string, unknown>;
+
+      expect(output).toEqual({
+        decision: 'block',
+        reason: 'keep going, finish the tests',
+      });
+    });
+
+    it('returns block with voice note text even if text is short', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'voice', text: 'continue' }),
+      };
+
+      const raw = buildStopOutput(result);
+      expect(raw).not.toBeNull();
+      const output = JSON.parse(raw as string) as Record<string, unknown>;
+
+      expect(output).toEqual({
+        decision: 'block',
+        reason: 'continue',
+      });
     });
   });
 
