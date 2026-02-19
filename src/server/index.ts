@@ -21,6 +21,8 @@ import { createHttpBridge, type HttpBridgeOptions } from './http-bridge.js';
 import { SlackAdapter } from '../slack/adapter.js';
 import { loadConfig, loadSecrets } from '../config/index.js';
 import { isOk } from '../errors/result.js';
+import type { TranscriptionProvider } from '../transcription/index.js';
+import { WhisperTranscriptionProvider } from '../transcription/whisper.js';
 
 /** Server state for clean shutdown. */
 let httpServer: Server | undefined;
@@ -90,12 +92,24 @@ export async function startServer(options?: StartServerOptions): Promise<void> {
     const config = configResult.data;
     const secrets = secretsResult.data;
 
+    // Create transcription provider when voice notes are enabled and API key is available
+    let transcriptionProvider: TranscriptionProvider | undefined;
+    if (config.multimodal.voiceNotes.enabled) {
+      const openaiApiKey =
+        process.env['ESCALATE_OPENAI_API_KEY'] ?? process.env['OPENAI_API_KEY'];
+      if (openaiApiKey) {
+        transcriptionProvider = new WhisperTranscriptionProvider(openaiApiKey);
+        console.error('[escalate] Voice note transcription enabled (Whisper provider)');
+      }
+    }
+
     slackAdapter = new SlackAdapter({
       botToken: secrets.slackBotToken,
       appToken: secrets.slackAppToken,
       channelId: config.slack.channelId,
       store,
       config,
+      transcriptionProvider,
     });
 
     try {
