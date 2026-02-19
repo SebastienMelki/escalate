@@ -1,9 +1,10 @@
 /**
- * Server entrypoint: wires MCP server + HTTP bridge + SQLite state store.
+ * Server entrypoint: wires MCP server + HTTP bridge + Slack adapter + SQLite state store.
  *
  * This is the main process started by Claude Code as an MCP server plugin.
  * It creates a shared SQLite database, starts the MCP server on stdio,
- * and starts the HTTP bridge on a dynamic port for hook script communication.
+ * starts the HTTP bridge on a dynamic port for hook script communication,
+ * and optionally connects the Slack adapter for phone escalations.
  *
  * CRITICAL: Never use console.log() in this file. The MCP server uses stdio,
  * so any stdout output corrupts the JSON-RPC protocol.
@@ -17,10 +18,14 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { EscalationStore } from '../state/store.js';
 import { createMcpServer } from './mcp-server.js';
 import { createHttpBridge } from './http-bridge.js';
+import { SlackAdapter } from '../slack/adapter.js';
+import { loadConfig, loadSecrets } from '../config/index.js';
+import { isOk } from '../errors/result.js';
 
 /** Server state for clean shutdown. */
 let httpServer: Server | undefined;
 let db: Database.Database | undefined;
+let slackAdapter: SlackAdapter | undefined;
 
 /** Options for starting the server. */
 export interface StartServerOptions {
@@ -75,13 +80,57 @@ export async function startServer(options?: StartServerOptions): Promise<void> {
     });
   });
 
-  // Connect MCP server to stdio transport
+  // Start Slack adapter (optional -- does not crash MCP server on failure)
+  const configResult = loadConfig();
+  const secretsResult = loadSecrets();
+
+  if (isOk(configResult) && isOk(secretsResult)) {
+    const config = configResult.data;
+    const secrets = secretsResult.data;
+
+    slackAdapter = new SlackAdapter({
+      botToken: secrets.slackBotToken,
+      appToken: secrets.slackAppToken,
+      channelId: config.slack.channelId,
+      store,
+    });
+
+    try {
+      await slackAdapter.start();
+      await slackAdapter.validateAndAnnounce();
+    } catch (error: unknown) {
+      console.error('[escalate] Slack adapter failed to start:', error);
+      // Don't crash the MCP server -- Slack is optional
+      // Log the error but continue with MCP + HTTP bridge
+      slackAdapter = undefined;
+    }
+  } else {
+    console.error('[escalate] Slack adapter not started: missing config or secrets');
+    if (!isOk(configResult)) {
+      console.error('[escalate] Config error:', configResult.error.message);
+    }
+    if (!isOk(secretsResult)) {
+      console.error('[escalate] Secrets error:', secretsResult.error.message);
+    }
+  }
+
+  // Connect MCP server to stdio transport (blocks on stdio -- must be last)
   const transport = new StdioServerTransport();
   await mcpServer.connect(transport);
 }
 
 /** Stop the server and clean up resources. */
 export async function stopServer(): Promise<void> {
+  // Stop Slack adapter first (best-effort)
+  if (slackAdapter) {
+    try {
+      await slackAdapter.stop();
+    } catch {
+      // Best-effort cleanup
+    }
+    slackAdapter = undefined;
+  }
+
   if (httpServer) {
     await new Promise<void>((resolve, reject) => {
       httpServer?.close((err) => {

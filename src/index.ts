@@ -51,3 +51,12 @@ export type {
 export { createMcpServer } from './server/mcp-server.js';
 export { createHttpBridge } from './server/http-bridge.js';
 export { startServer } from './server/index.js';
+
+// Slack module
+export { SlackAdapter } from './slack/index.js';
+export type { SlackAdapterOptions } from './slack/index.js';
+export {
+  buildEscalationBlocks,
+  buildConfirmationBlocks,
+  buildFallbackText,
+} from './slack/index.js';
