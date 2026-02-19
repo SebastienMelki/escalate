@@ -28,7 +28,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **IPC-01**: MCP server exposes local HTTP bridge endpoint for hook script communication (separate from stdio MCP protocol)
 - [x] **IPC-02**: SQLite state store (better-sqlite3) tracks pending escalations by correlation ID with timestamps
-- [x] **IPC-03**: Hook scripts poll SQLite for user response with configurable timeout (default 10 minutes for PermissionRequest)
+- [ ] **IPC-03**: Hook scripts poll SQLite for user response with configurable timeout (default 10 minutes for PermissionRequest)
 - [x] **IPC-04**: User response from Slack routes back to Claude Code — hook exits 0 (allow) or 2 (deny) with optional JSON payload
 - [x] **IPC-05**: Graceful timeout with configurable fallback decision per event type (allow, deny, or ask-again)
 - [x] **IPC-06**: Slack interactive payloads acknowledged within 3 seconds independently of hook timeout
@@ -50,8 +50,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Multimodal
 
-- [x] **MDIA-01**: Voice note interpretation — download audio from Slack thread, send to Claude API for transcription, normalize to text response
-- [x] **MDIA-02**: Emoji reaction responses — configurable emoji-to-decision mapping (e.g., checkmark = approve, X = deny)
+- [ ] **MDIA-01**: Voice note interpretation — download audio from Slack thread, send to Claude API for transcription, normalize to text response
+- [ ] **MDIA-02**: Emoji reaction responses — configurable emoji-to-decision mapping (e.g., checkmark = approve, X = deny)
 
 ### Platform & Plugin
 
@@ -117,7 +117,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SLCK-06     | Phase 8 | Complete |
 | IPC-01      | Phase 2 | Complete |
 | IPC-02      | Phase 2 | Complete |
-| IPC-03      | Phase 2 | Complete |
+| IPC-03      | Phase 11 | Pending |
 | IPC-04      | Phase 8 | Complete |
 | IPC-05      | Phase 2 | Complete |
 | IPC-06      | Phase 4 | Complete |
@@ -130,8 +130,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTL-03     | Phase 9 | Complete |
 | INTL-04     | Phase 5 | Complete |
 | INTL-05     | Phase 5 | Complete |
-| MDIA-01     | Phase 8 | Complete |
-| MDIA-02     | Phase 8 | Complete |
+| MDIA-01     | Phase 10 | Pending |
+| MDIA-02     | Phase 10 | Pending |
 | PLAT-01     | Phase 2 | Complete |
 | PLAT-02     | Phase 1 | Complete |
 | PLAT-03     | Phase 9 | Complete |
@@ -143,8 +143,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 - v1 requirements: 34 total
 - Mapped to phases: 34
-- Complete: 23
-- Pending (gap closure): 11 (7 in Phase 8, 4 in Phase 9)
+- Complete: 31
+- Pending (gap closure): 3 (2 in Phase 10, 1 in Phase 11)
 - Unmapped: 0
 
 ---

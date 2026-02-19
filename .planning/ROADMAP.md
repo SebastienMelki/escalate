@@ -22,6 +22,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 7: Plugin Packaging** - tsup bundling, plugin.json manifest, .mcp.json with CLAUDE_PLUGIN_ROOT paths, self-contained distribution (completed 2026-02-19)
 - [x] **Phase 8: Fix UUID Mismatch in Escalation Loop** - Pass store record ID through EscalationRequest to SlackAdapter, fix button/thread/emoji/voice resolution path (Gap Closure) (completed 2026-02-19)
 - [x] **Phase 9: Config, Manifest, and Documentation Fixes** - Fix README env vars, .mcp.json passthrough, auditLog.enabled gate, version sync (Gap Closure) (completed 2026-02-19)
+- [ ] **Phase 10: Fix Multimodal Response Types in Hook Output** - Handle 'reaction' and 'voice' response types in output-helpers.ts so emoji and voice note approvals complete the E2E loop (Gap Closure)
+- [ ] **Phase 11: Read Hook Timeouts from Config** - Hook scripts read timeout_seconds from escalate.config.json instead of hardcoding values (Gap Closure)
 
 ## Phase Details
 
@@ -189,10 +191,34 @@ Plans:
 
 - [x] 09-01-PLAN.md — Fix README env vars, .mcp.json passthrough, audit log gate, version sync
 
+### Phase 10: Fix Multimodal Response Types in Hook Output
+
+**Goal**: Emoji reactions and voice notes resolve escalations correctly through the full hook output path, not just at the Slack adapter level
+**Depends on**: Phase 9
+**Requirements**: MDIA-01, MDIA-02
+**Gap Closure:** Closes 2 broken E2E flows from v1.0 re-audit (type:'reaction' and type:'voice' unhandled in output-helpers.ts)
+**Success Criteria** (what must be TRUE):
+
+1. A `type:'reaction'` response with `actionId:'approve'` produces an ALLOW decision (exit 0) for PermissionRequest/PreToolUse hooks
+2. A `type:'voice'` response with transcribed text produces an ALLOW decision when text indicates approval, and routes text as context for Stop hooks
+3. Both emoji reaction and voice note approval flows complete the full round-trip: Slack → store.resolve → hook poll → correct exit code
+
+### Phase 11: Read Hook Timeouts from Config
+
+**Goal**: Hook scripts read timeout values from escalate.config.json so users can tune escalation wait times without modifying code
+**Depends on**: Phase 10
+**Requirements**: IPC-03
+**Gap Closure:** Closes IPC-03 partial satisfaction from v1.0 re-audit (hardcoded timeout_seconds in hook scripts)
+**Success Criteria** (what must be TRUE):
+
+1. Each hook script reads its event-type-specific timeout from `escalate.config.json` `timeouts` section
+2. Changing `timeouts.permissionRequest` in config changes the actual timeout used by the PermissionRequest hook script
+3. Fallback to current hardcoded defaults when config is missing or timeout field is absent
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11
 
 | Phase                                    | Plans Complete | Status      | Completed  |
 | ---------------------------------------- | -------------- | ----------- | ---------- |
@@ -205,3 +231,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 7. Plugin Packaging                      | 2/2            | Complete    | 2026-02-19 |
 | 8. Fix UUID Mismatch (Gap Closure)       | 1/1            | Complete    | 2026-02-19 |
 | 9. Config & Manifest Fixes (Gap Closure) | 1/1            | Complete    | 2026-02-19 |
+| 10. Fix Multimodal Response Types (Gap Closure) | 0/0     | Not Started |            |
+| 11. Read Hook Timeouts from Config (Gap Closure) | 0/0    | Not Started |            |
