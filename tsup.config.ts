@@ -17,5 +17,5 @@ export default defineConfig({
   sourcemap: true,
   target: 'node22',
   outDir: 'dist',
-  external: ['better-sqlite3', '@slack/bolt'],
+  external: ['better-sqlite3', '@slack/bolt', 'openai'],
 });

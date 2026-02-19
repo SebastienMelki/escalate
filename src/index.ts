@@ -52,6 +52,10 @@ export { createMcpServer } from './server/mcp-server.js';
 export { createHttpBridge } from './server/http-bridge.js';
 export { startServer } from './server/index.js';
 
+// Transcription module
+export type { TranscriptionProvider, TranscriptionResult } from './transcription/index.js';
+export { WhisperTranscriptionProvider } from './transcription/whisper.js';
+
 // Slack module
 export { SlackAdapter } from './slack/index.js';
 export type { SlackAdapterOptions } from './slack/index.js';
