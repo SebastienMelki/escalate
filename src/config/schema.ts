@@ -10,6 +10,9 @@ import {
   DEFAULT_ESCALATION_POLICIES,
   DEFAULT_FALLBACK_ACTIONS,
   DEFAULT_QUIET_HOURS,
+  DEFAULT_EMOJI_MAPPING,
+  DEFAULT_VOICE_NOTES,
+  DEFAULT_MULTIMODAL,
 } from './defaults.js';
 
 /** Urgency level for escalation classification. */
@@ -69,6 +72,34 @@ export const QuietHoursSchema = z.object({
   criticalEvents: z.array(z.string()).default(['PermissionRequest', 'Stop']),
 });
 
+/** Emoji name-to-action mapping schema. */
+export const EmojiMappingSchema = z
+  .record(z.string(), z.string())
+  .default({ ...DEFAULT_EMOJI_MAPPING });
+
+/** Emoji reactions configuration schema. */
+export const EmojiReactionsSchema = z.object({
+  enabled: z.boolean().default(true),
+  mapping: EmojiMappingSchema,
+});
+
+/** Voice note transcription configuration schema. */
+export const VoiceNoteConfigSchema = z.object({
+  enabled: z.boolean().default(false),
+  provider: z.enum(['whisper']).default('whisper'),
+  maxDurationSeconds: z.number().min(1).max(300).default(120),
+  maxFileSizeMb: z.number().min(1).max(25).default(10),
+});
+
+/** Multimodal response configuration schema (emoji reactions + voice notes). */
+export const MultimodalConfigSchema = z.object({
+  emojiReactions: EmojiReactionsSchema.default({
+    enabled: true,
+    mapping: { ...DEFAULT_EMOJI_MAPPING },
+  }),
+  voiceNotes: VoiceNoteConfigSchema.default({ ...DEFAULT_VOICE_NOTES }),
+});
+
 /** Audit log configuration schema. */
 export const AuditLogSchema = z.object({
   enabled: z.boolean().default(true),
@@ -87,6 +118,7 @@ export const EscalateConfigSchema = z.object({
     ...DEFAULT_QUIET_HOURS,
     criticalEvents: [...DEFAULT_QUIET_HOURS.criticalEvents],
   }),
+  multimodal: MultimodalConfigSchema.default({ ...DEFAULT_MULTIMODAL }),
   auditLog: AuditLogSchema.default({ enabled: true }),
 });
 

@@ -45,3 +45,27 @@ export const DEFAULT_QUIET_HOURS = {
   timezone: 'UTC',
   criticalEvents: ['PermissionRequest', 'Stop'],
 } as const;
+
+/** Default emoji-to-action mapping for reaction responses. */
+export const DEFAULT_EMOJI_MAPPING = {
+  white_check_mark: 'approve',
+  heavy_check_mark: 'approve',
+  thumbsup: 'approve',
+  x: 'deny',
+  no_entry_sign: 'deny',
+  thumbsdown: 'deny',
+} as const;
+
+/** Default voice notes configuration (disabled by default). */
+export const DEFAULT_VOICE_NOTES = {
+  enabled: false,
+  provider: 'whisper' as const,
+  maxDurationSeconds: 120,
+  maxFileSizeMb: 10,
+} as const;
+
+/** Default multimodal configuration (emoji reactions on, voice notes off). */
+export const DEFAULT_MULTIMODAL = {
+  emojiReactions: { enabled: true, mapping: { ...DEFAULT_EMOJI_MAPPING } },
+  voiceNotes: { ...DEFAULT_VOICE_NOTES },
+} as const;

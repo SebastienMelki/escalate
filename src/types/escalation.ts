@@ -9,7 +9,7 @@
 export type UrgencyLevel = 'info' | 'warning' | 'critical';
 
 /** How the user responded to an escalation. */
-export type ResponseType = 'action' | 'text' | 'timeout';
+export type ResponseType = 'action' | 'text' | 'timeout' | 'voice' | 'reaction';
 
 /** A suggested action button presented to the user. */
 export interface SuggestedAction {
@@ -41,6 +41,7 @@ export interface UserResponse {
   readonly type: ResponseType;
   readonly actionId?: string;
   readonly text?: string;
+  readonly emoji?: string;
   readonly respondedAt: Date;
 }
 
