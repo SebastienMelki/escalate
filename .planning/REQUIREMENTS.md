@@ -58,7 +58,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **PLAT-01**: MCP server runs with stdio transport as Claude Code plugin process
 - [x] **PLAT-02**: MessagingAdapter interface defined with sendEscalation, waitForResponse, sendFollowUp, isConnected methods
 - [x] **PLAT-03**: Slack adapter implements full MessagingAdapter interface using @slack/bolt Socket Mode
-- [ ] **PLAT-04**: Plugin packaged as Claude Code plugin — plugin.json manifest, hooks.json, .mcp.json with ${CLAUDE_PLUGIN_ROOT} paths
+- [x] **PLAT-04**: Plugin packaged as Claude Code plugin — plugin.json manifest, hooks.json, .mcp.json with ${CLAUDE_PLUGIN_ROOT} paths
 - [x] **PLAT-05**: All output bundled with tsup for self-contained distribution (no npm install needed post-install)
 - [x] **PLAT-06**: Aggressive TypeScript linting from day one — strict tsconfig (strict: true, noUncheckedIndexedAccess, exactOptionalPropertyTypes), ESLint with @typescript-eslint/strict, no-any rules, enforced from first commit
 
@@ -135,7 +135,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLAT-01     | Phase 2 | Complete |
 | PLAT-02     | Phase 1 | Complete |
 | PLAT-03     | Phase 3 | Complete |
-| PLAT-04     | Phase 7 | Pending  |
+| PLAT-04     | Phase 7 | Complete |
 | PLAT-05     | Phase 7 | Complete |
 | PLAT-06     | Phase 1 | Complete |
 
