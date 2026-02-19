@@ -4,13 +4,13 @@
  * Creates the `escalations` table with STRICT typing and configures
  * WAL mode for concurrent read/write access.
  */
-import type Database from 'better-sqlite3';
+import type { DatabaseSync } from 'node:sqlite';
 
 /** Initialize the database with WAL mode and create the escalations table. */
-export function initializeDatabase(db: Database.Database): void {
-  db.pragma('journal_mode = WAL');
-  db.pragma('busy_timeout = 5000');
-  db.pragma('foreign_keys = ON');
+export function initializeDatabase(db: DatabaseSync): void {
+  db.exec('PRAGMA journal_mode = WAL');
+  db.exec('PRAGMA busy_timeout = 5000');
+  db.exec('PRAGMA foreign_keys = ON');
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS escalations (

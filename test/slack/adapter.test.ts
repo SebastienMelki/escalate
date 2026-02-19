@@ -6,7 +6,7 @@
  * timeout behavior, and credential validation.
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import { EscalationStore } from '../../src/state/store.js';
 import type { EscalationRequest } from '../../src/types/escalation.js';
 import type { EscalateConfig } from '../../src/config/schema.js';
@@ -81,7 +81,7 @@ describe('SlackAdapter', () => {
   let store: EscalationStore;
 
   beforeEach(() => {
-    const db = new Database(':memory:');
+    const db = new DatabaseSync(':memory:');
     store = new EscalationStore(db);
 
     // Reset handler registrations

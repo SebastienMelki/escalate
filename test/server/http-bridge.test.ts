@@ -6,18 +6,18 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { Server } from 'node:http';
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import { EscalationStore } from '../../src/state/store.js';
 import { createHttpBridge } from '../../src/server/http-bridge.js';
 
 describe('HTTP Bridge', () => {
-  let db: Database.Database;
+  let db: DatabaseSync;
   let store: EscalationStore;
   let server: Server;
   let baseUrl: string;
 
   beforeAll(async () => {
-    db = new Database(':memory:');
+    db = new DatabaseSync(':memory:');
     store = new EscalationStore(db);
     server = createHttpBridge({ store });
 

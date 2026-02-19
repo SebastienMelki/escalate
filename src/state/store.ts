@@ -1,10 +1,10 @@
 /**
  * SQLite-backed escalation state store.
  *
- * Provides CRUD operations for escalation records using better-sqlite3.
- * All operations are synchronous (better-sqlite3 is sync by design).
+ * Provides CRUD operations for escalation records using node:sqlite.
+ * All operations are synchronous (node:sqlite DatabaseSync is sync by design).
  */
-import type Database from 'better-sqlite3';
+import type { DatabaseSync, StatementSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { initializeDatabase } from './schema.js';
 import type { EscalationRecord, CreateEscalationParams, FallbackAction } from './types.js';
@@ -39,15 +39,15 @@ function rowToRecord(row: EscalationRow): EscalationRecord {
 
 /** CRUD operations for escalation state stored in SQLite. */
 export class EscalationStore {
-  private readonly db: Database.Database;
-  private readonly insertStmt: Database.Statement;
-  private readonly getByIdStmt: Database.Statement;
-  private readonly resolveStmt: Database.Statement;
-  private readonly checkTimeoutStmt: Database.Statement;
-  private readonly markTimedOutStmt: Database.Statement;
-  private readonly getPendingStmt: Database.Statement;
+  private readonly db: DatabaseSync;
+  private readonly insertStmt: StatementSync;
+  private readonly getByIdStmt: StatementSync;
+  private readonly resolveStmt: StatementSync;
+  private readonly checkTimeoutStmt: StatementSync;
+  private readonly markTimedOutStmt: StatementSync;
+  private readonly getPendingStmt: StatementSync;
 
-  constructor(db: Database.Database) {
+  constructor(db: DatabaseSync) {
     this.db = db;
     initializeDatabase(db);
 
@@ -102,14 +102,14 @@ export class EscalationStore {
 
   /** Get an escalation by its ID, or undefined if not found. */
   getById(id: string): EscalationRecord | undefined {
-    const row = this.getByIdStmt.get(id) as EscalationRow | undefined;
+    const row = this.getByIdStmt.get(id) as unknown as EscalationRow | undefined;
     return row ? rowToRecord(row) : undefined;
   }
 
   /** Resolve a pending escalation. Returns true if resolved, false if not found or already resolved. */
   resolve(id: string, responseJson: string): boolean {
     const result = this.resolveStmt.run(responseJson, id);
-    return result.changes > 0;
+    return Number(result.changes) > 0;
   }
 
   /**
@@ -118,7 +118,7 @@ export class EscalationStore {
    * Returns null if not timed out, not found, or not pending.
    */
   checkTimeout(id: string): FallbackAction | null {
-    const row = this.checkTimeoutStmt.get(id) as { fallback_action: string } | undefined;
+    const row = this.checkTimeoutStmt.get(id) as unknown as { fallback_action: string } | undefined;
     if (!row) return null;
     this.markTimedOutStmt.run(id);
     return row.fallback_action as FallbackAction;
@@ -126,7 +126,7 @@ export class EscalationStore {
 
   /** Get all pending escalations ordered by creation time (oldest first). */
   getPending(): EscalationRecord[] {
-    const rows = this.getPendingStmt.all() as EscalationRow[];
+    const rows = this.getPendingStmt.all() as unknown as EscalationRow[];
     return rows.map(rowToRecord);
   }
 }

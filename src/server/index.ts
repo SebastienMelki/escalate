@@ -13,7 +13,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { Server } from 'node:http';
 import { fileURLToPath } from 'node:url';
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { EscalationStore } from '../state/store.js';
 import { createMcpServer } from './mcp-server.js';
@@ -26,7 +26,7 @@ import { WhisperTranscriptionProvider } from '../transcription/whisper.js';
 
 /** Server state for clean shutdown. */
 let httpServer: Server | undefined;
-let db: Database.Database | undefined;
+let db: DatabaseSync | undefined;
 let slackAdapter: SlackAdapter | undefined;
 
 /** Options for starting the server. */
@@ -54,7 +54,7 @@ export async function startServer(options?: StartServerOptions): Promise<void> {
   mkdirSync(dirname(dbPath), { recursive: true });
 
   // Open SQLite database
-  db = new Database(dbPath);
+  db = new DatabaseSync(dbPath);
 
   // Create state store
   const store = new EscalationStore(db);

@@ -1,13 +1,12 @@
 import { describe, it, expect, beforeEach, assert } from 'vitest';
-import Database from 'better-sqlite3';
-import type { Database as DatabaseType } from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import { initializeDatabase } from '../../src/state/schema.js';
 import { EscalationStore } from '../../src/state/store.js';
 import type { FallbackAction } from '../../src/state/types.js';
 
 describe('initializeDatabase', () => {
   it('creates the escalations table', () => {
-    const db = new Database(':memory:');
+    const db = new DatabaseSync(':memory:');
     initializeDatabase(db);
 
     const tables = db
@@ -24,11 +23,11 @@ describe('initializeDatabase', () => {
 });
 
 describe('EscalationStore', () => {
-  let db: DatabaseType;
+  let db: DatabaseSync;
   let store: EscalationStore;
 
   beforeEach(() => {
-    db = new Database(':memory:');
+    db = new DatabaseSync(':memory:');
     store = new EscalationStore(db);
   });
 
