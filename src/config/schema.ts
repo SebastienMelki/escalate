@@ -5,7 +5,11 @@
  * for optional fields (timeouts, escalation policies).
  */
 import { z } from 'zod';
-import { DEFAULT_TIMEOUTS, DEFAULT_ESCALATION_POLICIES } from './defaults.js';
+import {
+  DEFAULT_TIMEOUTS,
+  DEFAULT_ESCALATION_POLICIES,
+  DEFAULT_FALLBACK_ACTIONS,
+} from './defaults.js';
 
 /** Urgency level for escalation classification. */
 export const UrgencyLevelSchema = z.enum(['info', 'warning', 'critical']);
@@ -37,6 +41,17 @@ export const EventEscalationConfigSchema = z.object({
   ),
 });
 
+/** Fallback action when an escalation times out. */
+export const FallbackActionSchema = z.enum(['allow', 'deny', 'ask-again']);
+
+/** Per-event fallback action configuration. */
+export const FallbackActionsConfigSchema = z.object({
+  permissionRequest: FallbackActionSchema.default(DEFAULT_FALLBACK_ACTIONS.permissionRequest),
+  preToolUse: FallbackActionSchema.default(DEFAULT_FALLBACK_ACTIONS.preToolUse),
+  stop: FallbackActionSchema.default(DEFAULT_FALLBACK_ACTIONS.stop),
+  postToolUseFailure: FallbackActionSchema.default(DEFAULT_FALLBACK_ACTIONS.postToolUseFailure),
+});
+
 /** Root configuration schema for escalate.config.json. */
 export const EscalateConfigSchema = z.object({
   slack: SlackConfigSchema,
@@ -44,6 +59,7 @@ export const EscalateConfigSchema = z.object({
   // fully-resolved default objects from our constants.
   timeouts: TimeoutConfigSchema.default({ ...DEFAULT_TIMEOUTS }),
   escalationPolicies: EventEscalationConfigSchema.default({ ...DEFAULT_ESCALATION_POLICIES }),
+  fallbackActions: FallbackActionsConfigSchema.default({ ...DEFAULT_FALLBACK_ACTIONS }),
 });
 
 /** Validated configuration type inferred from the Zod schema. */

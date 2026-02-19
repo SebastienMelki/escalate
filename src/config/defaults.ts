@@ -28,3 +28,11 @@ export const DEFAULT_ESCALATION_POLICIES = {
   /** Always escalate post-tool-use failures. */
   postToolUseFailure: 'always',
 } as const;
+
+/** Default fallback actions per event type when an escalation times out. */
+export const DEFAULT_FALLBACK_ACTIONS = {
+  permissionRequest: 'deny',
+  preToolUse: 'deny',
+  stop: 'ask-again',
+  postToolUseFailure: 'allow',
+} as const;

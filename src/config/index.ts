@@ -12,6 +12,8 @@ export {
   TimeoutConfigSchema,
   EscalationPolicySchema,
   EventEscalationConfigSchema,
+  FallbackActionSchema,
+  FallbackActionsConfigSchema,
 } from './schema.js';
 export type { EscalateConfig } from './schema.js';
 
@@ -20,4 +22,4 @@ export { loadConfig, loadSecrets } from './loader.js';
 export type { ConfigError, ConfigSecrets } from './loader.js';
 
 // Defaults
-export { DEFAULT_TIMEOUTS, DEFAULT_ESCALATION_POLICIES } from './defaults.js';
+export { DEFAULT_TIMEOUTS, DEFAULT_ESCALATION_POLICIES, DEFAULT_FALLBACK_ACTIONS } from './defaults.js';
