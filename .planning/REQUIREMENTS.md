@@ -50,8 +50,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Multimodal
 
-- [ ] **MDIA-01**: Voice note interpretation — download audio from Slack thread, send to Claude API for transcription, normalize to text response
-- [ ] **MDIA-02**: Emoji reaction responses — configurable emoji-to-decision mapping (e.g., checkmark = approve, X = deny)
+- [x] **MDIA-01**: Voice note interpretation — download audio from Slack thread, send to Claude API for transcription, normalize to text response
+- [x] **MDIA-02**: Emoji reaction responses — configurable emoji-to-decision mapping (e.g., checkmark = approve, X = deny)
 
 ### Platform & Plugin
 
@@ -130,8 +130,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTL-03     | Phase 9 | Complete |
 | INTL-04     | Phase 5 | Complete |
 | INTL-05     | Phase 5 | Complete |
-| MDIA-01     | Phase 10 | Pending |
-| MDIA-02     | Phase 10 | Pending |
+| MDIA-01     | Phase 10 | Complete |
+| MDIA-02     | Phase 10 | Complete |
 | PLAT-01     | Phase 2 | Complete |
 | PLAT-02     | Phase 1 | Complete |
 | PLAT-03     | Phase 9 | Complete |
