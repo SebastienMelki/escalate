@@ -46,3 +46,8 @@ export type {
   FallbackAction,
   CreateEscalationParams,
 } from './state/index.js';
+
+// Server module
+export { createMcpServer } from './server/mcp-server.js';
+export { createHttpBridge } from './server/http-bridge.js';
+export { startServer } from './server/index.js';

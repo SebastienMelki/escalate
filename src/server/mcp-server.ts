@@ -40,7 +40,7 @@ export function createMcpServer(store: EscalationStore): McpServer {
         timeout_seconds: z.number().default(600),
       },
     },
-    async (args) => {
+    (args) => {
       const record = store.create({
         eventType: args.event_type,
         requestJson: JSON.stringify({
@@ -76,7 +76,7 @@ export function createMcpServer(store: EscalationStore): McpServer {
         escalation_id: z.string(),
       },
     },
-    async (args) => {
+    (args) => {
       // Check for timeout first
       store.checkTimeout(args.escalation_id);
 
@@ -108,7 +108,7 @@ export function createMcpServer(store: EscalationStore): McpServer {
         response_json: z.string(),
       },
     },
-    async (args) => {
+    (args) => {
       const resolved = store.resolve(args.escalation_id, args.response_json);
 
       return {
@@ -131,7 +131,7 @@ export function createMcpServer(store: EscalationStore): McpServer {
     {
       description: 'List all pending escalations',
     },
-    async () => {
+    () => {
       const pending = store.getPending();
 
       return {
