@@ -128,12 +128,12 @@ Plans:
 
 1. A voice note sent in a Slack escalation thread is downloaded, sent to Claude API for transcription, and the transcribed text resolves the pending escalation
 2. An emoji reaction on an escalation message (e.g., checkmark = approve, X = deny) resolves the pending escalation according to a configurable mapping
-   **Plans**: TBD
+   **Plans**: 2 plans
 
 Plans:
 
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — Extended types, multimodal config schema, TranscriptionProvider + WhisperTranscriptionProvider
+- [ ] 06-02-PLAN.md — Emoji reaction handler, voice note handler, Slack adapter integration, server startup wiring
 
 ### Phase 7: Plugin Packaging
 
