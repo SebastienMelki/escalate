@@ -111,13 +111,13 @@ Plans:
 3. Every escalation event is recorded in an append-only audit log with timestamp, event type, message sent, response received, and decision applied
 4. During configured quiet hours, only critical escalations (PermissionRequest, Stop) are sent; others are auto-handled per fallback policy
 5. On TaskCompleted or Stop, a session summary DM is sent listing phases completed, decisions made, and notable events
-   **Plans**: TBD
+   **Plans**: 3 plans
 
 Plans:
 
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
-- [ ] 05-03: TBD
+- [ ] 05-01-PLAN.md — Auto-approval rules, quiet hours, config schema extension (TDD)
+- [ ] 05-02-PLAN.md — Audit log writer/reader, session summary builder (TDD)
+- [ ] 05-03-PLAN.md — HTTP bridge intelligence integration, TaskCompleted hook, summary dispatch
 
 ### Phase 6: Multimodal Responses
 
