@@ -5,24 +5,24 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Run GSD end-to-end autonomously, escalating to the human through their phone only when a decision, approval, or intervention is actually required.
-**Current focus:** Phase 4: Hook Scripts and Escalation Loop (Complete)
+**Current focus:** Phase 5: Escalation Intelligence (In Progress)
 
 ## Current Position
 
-Phase: 4 of 7 (Hook Scripts and Escalation Loop)
-Plan: 2 of 2 in current phase
-Status: Phase Complete
-Last activity: 2026-02-19 — Completed 04-02-PLAN.md
+Phase: 5 of 7 (Escalation Intelligence)
+Plan: 2 of 3 in current phase
+Status: In Progress
+Last activity: 2026-02-19 — Completed 05-02-PLAN.md
 
-Progress: [██████░░░░] 64%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9
+- Total plans completed: 11
 - Average duration: 5min
-- Total execution time: 0.73 hours
+- Total execution time: 0.90 hours
 
 **By Phase:**
 
@@ -32,10 +32,11 @@ Progress: [██████░░░░] 64%
 | 2-State Store & IPC Bridge   | 2/2   | 11min | 5min     |
 | 3-Slack Adapter              | 2/2   | 12min | 6min     |
 | 4-Hook Scripts & Escalation  | 2/2   | 9min  | 4.5min   |
+| 5-Escalation Intelligence    | 1/3   | 5min  | 5min     |
 
 **Recent Trend:**
 
-- Last 5 plans: 02-02 (5min), 03-01 (6min), 03-02 (6min), 04-01 (4min), 04-02 (5min)
+- Last 5 plans: 03-01 (6min), 03-02 (6min), 04-01 (4min), 04-02 (5min), 05-01 (5min)
 - Trend: Stable
 
 _Updated after each plan completion_
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [04-02]: Bracket notation for Record index access to satisfy noPropertyAccessFromIndexSignature
 - [04-02]: PreToolUse matcher Bash|Write|Edit restricts escalation to dangerous tools only
 - [04-02]: PostToolUseFailure uses async:true flag for fire-and-forget with 30s timeout
+- [05-01]: Used charAt() instead of bracket index for globToRegex ESLint noUncheckedIndexedAccess compatibility
+- [05-01]: Spread readonly criticalEvents array with [...] for Zod default() mutable type requirement
+- [05-01]: Intl.DateTimeFormat formatToParts for timezone-aware quiet hours detection
 
 ### Pending Todos
 
@@ -90,5 +94,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 04-02-PLAN.md (Hook scripts, hooks.json, output helpers -- 3 tasks, 14 new tests, 94 total)
-Resume file: .planning/phases/04-hook-scripts-and-escalation-loop/04-02-SUMMARY.md
+Stopped at: Completed 05-01-PLAN.md (Rules engine, quiet hours, config schema extension -- 2 tasks, 31 new tests)
+Resume file: .planning/phases/05-escalation-intelligence/05-01-SUMMARY.md
