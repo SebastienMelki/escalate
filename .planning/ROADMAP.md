@@ -219,6 +219,11 @@ Plans:
 1. Each hook script reads its event-type-specific timeout from `escalate.config.json` `timeouts` section
 2. Changing `timeouts.permissionRequest` in config changes the actual timeout used by the PermissionRequest hook script
 3. Fallback to current hardcoded defaults when config is missing or timeout field is absent
+   **Plans**: 1 plan
+
+Plans:
+
+- [ ] 11-01-PLAN.md — Add readTimeoutMs helper to bridge-client and wire config-driven timeouts into all 4 hook scripts
 
 ## Progress
 
@@ -237,4 +242,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Fix UUID Mismatch (Gap Closure)       | 1/1            | Complete    | 2026-02-19 |
 | 9. Config & Manifest Fixes (Gap Closure) | 1/1            | Complete    | 2026-02-19 |
 | 10. Fix Multimodal Response Types (Gap Closure) | 1/1 | Complete    | 2026-02-19 |
-| 11. Read Hook Timeouts from Config (Gap Closure) | 0/0    | Not Started |            |
+| 11. Read Hook Timeouts from Config (Gap Closure) | 0/1    | Not Started |            |
