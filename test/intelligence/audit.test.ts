@@ -1,5 +1,5 @@
-import { describe, it, expect, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { describe, it, expect, afterEach, assert } from 'vitest';
+import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { AuditEntry } from '../../src/intelligence/audit.js';
@@ -61,8 +61,12 @@ describe('appendAuditEntry', () => {
     const lines = readFileSync(logPath, 'utf-8').trim().split('\n');
     expect(lines).toHaveLength(2);
 
-    const parsed1: unknown = JSON.parse(lines[0]!);
-    const parsed2: unknown = JSON.parse(lines[1]!);
+    const line0 = lines[0];
+    const line1 = lines[1];
+    assert(line0 !== undefined);
+    assert(line1 !== undefined);
+    const parsed1: unknown = JSON.parse(line0);
+    const parsed2: unknown = JSON.parse(line1);
     expect(parsed1).toEqual(entry1);
     expect(parsed2).toEqual(entry2);
   });
@@ -140,7 +144,8 @@ describe('readAuditLog', () => {
     writeFileSync(logPath, JSON.stringify(entry) + '\n', 'utf-8');
 
     const result = readAuditLog(logPath);
-    const parsed = result[0]!;
+    const parsed = result[0];
+    assert(parsed !== undefined);
 
     expect(parsed.timestamp).toBe('2026-02-19T12:00:00Z');
     expect(parsed.eventType).toBe('PostToolUseFailure');
