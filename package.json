@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
+    "@slack/bolt": "^4.6.0",
     "better-sqlite3": "^12.6.2",
     "zod": "^4.3.6"
   },
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@slack/types": "^2.20.0",
     "@tsconfig/node22": "^22.0.5",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.2.3",
