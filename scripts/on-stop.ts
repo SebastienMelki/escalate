@@ -7,6 +7,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { readPort, createEscalation, pollForResponse } from './lib/bridge-client.js';
+import { buildStopOutput } from './lib/output-helpers.js';
 
 async function main(): Promise<void> {
   const input = JSON.parse(readFileSync('/dev/stdin', 'utf-8')) as Record<string, unknown>;
@@ -26,20 +27,10 @@ async function main(): Promise<void> {
   });
 
   const result = await pollForResponse(port, esc.escalation_id);
-
-  if (result.status === 'resolved' && result.responseJson) {
-    const response = JSON.parse(result.responseJson) as Record<string, unknown>;
-    if (response['type'] === 'action' && response['actionId'] === 'continue') {
-      process.stdout.write(JSON.stringify({ decision: 'block', reason: 'User wants to continue via Escalate' }));
-      process.exit(0);
-    }
-    if (response['type'] === 'text' && typeof response['text'] === 'string') {
-      process.stdout.write(JSON.stringify({ decision: 'block', reason: response['text'] }));
-      process.exit(0);
-    }
+  const output = buildStopOutput(result);
+  if (output) {
+    process.stdout.write(output);
   }
-
-  // Default: allow stop
   process.exit(0);
 }
 

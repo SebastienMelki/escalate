@@ -7,6 +7,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { readPort, createEscalation, pollForResponse } from './lib/bridge-client.js';
+import { buildPermissionRequestOutput } from './lib/output-helpers.js';
 
 async function main(): Promise<void> {
   const input = JSON.parse(readFileSync('/dev/stdin', 'utf-8')) as Record<string, unknown>;
@@ -20,28 +21,7 @@ async function main(): Promise<void> {
   });
 
   const result = await pollForResponse(port, esc.escalation_id);
-
-  if (result.status === 'resolved' && result.responseJson) {
-    const response = JSON.parse(result.responseJson) as Record<string, unknown>;
-    if (response['type'] === 'action' && response['actionId'] === 'approve') {
-      process.stdout.write(
-        JSON.stringify({
-          hookSpecificOutput: { hookEventName: 'PermissionRequest', decision: { behavior: 'allow' } },
-        }),
-      );
-      process.exit(0);
-    }
-  }
-
-  // Default: deny
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'PermissionRequest',
-        decision: { behavior: 'deny', message: 'Permission denied by user via Escalate' },
-      },
-    }),
-  );
+  process.stdout.write(buildPermissionRequestOutput(result));
   process.exit(0);
 }
 

@@ -7,6 +7,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { readPort, createEscalation } from './lib/bridge-client.js';
+import { buildPostToolFailureOutput } from './lib/output-helpers.js';
 
 async function main(): Promise<void> {
   const input = JSON.parse(readFileSync('/dev/stdin', 'utf-8')) as Record<string, unknown>;
@@ -20,14 +21,7 @@ async function main(): Promise<void> {
   });
 
   // Fire-and-forget notification. Provide context back to Claude.
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'PostToolUseFailure',
-        additionalContext: 'User has been notified of this failure via Slack',
-      },
-    }),
-  );
+  process.stdout.write(buildPostToolFailureOutput());
   process.exit(0);
 }
 
