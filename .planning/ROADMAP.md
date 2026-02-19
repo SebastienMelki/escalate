@@ -145,12 +145,12 @@ Plans:
 1. Running tsup produces a self-contained dist/ bundle with no runtime dependency on node_modules
 2. The plugin installs in Claude Code via plugin.json manifest with all paths using ${CLAUDE_PLUGIN_ROOT}
 3. Copying the plugin to a fresh directory and running `claude --plugin-dir .` starts the MCP server and registers all hooks without errors
-   **Plans**: TBD
+   **Plans**: 2 plans
 
 Plans:
 
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md — Migrate better-sqlite3 to node:sqlite and configure tsup for self-contained bundling
+- [ ] 07-02-PLAN.md — Finalize plugin manifest and end-to-end plugin isolation validation
 
 ## Progress
 
