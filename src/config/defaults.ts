@@ -36,3 +36,12 @@ export const DEFAULT_FALLBACK_ACTIONS = {
   stop: 'ask-again',
   postToolUseFailure: 'allow',
 } as const;
+
+/** Default quiet hours configuration (disabled by default). */
+export const DEFAULT_QUIET_HOURS = {
+  enabled: false,
+  start: '22:00',
+  end: '07:00',
+  timezone: 'UTC',
+  criticalEvents: ['PermissionRequest', 'Stop'],
+} as const;

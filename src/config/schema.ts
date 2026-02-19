@@ -9,6 +9,7 @@ import {
   DEFAULT_TIMEOUTS,
   DEFAULT_ESCALATION_POLICIES,
   DEFAULT_FALLBACK_ACTIONS,
+  DEFAULT_QUIET_HOURS,
 } from './defaults.js';
 
 /** Urgency level for escalation classification. */
@@ -52,6 +53,27 @@ export const FallbackActionsConfigSchema = z.object({
   postToolUseFailure: FallbackActionSchema.default(DEFAULT_FALLBACK_ACTIONS.postToolUseFailure),
 });
 
+/** Auto-approval rule schema for conditional escalation bypass. */
+export const AutoApprovalRuleSchema = z.object({
+  type: z.enum(['tool_name', 'file_path']),
+  pattern: z.string().min(1),
+  description: z.string().optional(),
+});
+
+/** Quiet hours configuration schema for time-based escalation suppression. */
+export const QuietHoursSchema = z.object({
+  enabled: z.boolean().default(false),
+  start: z.string().regex(/^\d{2}:\d{2}$/).default('22:00'),
+  end: z.string().regex(/^\d{2}:\d{2}$/).default('07:00'),
+  timezone: z.string().default('UTC'),
+  criticalEvents: z.array(z.string()).default(['PermissionRequest', 'Stop']),
+});
+
+/** Audit log configuration schema. */
+export const AuditLogSchema = z.object({
+  enabled: z.boolean().default(true),
+});
+
 /** Root configuration schema for escalate.config.json. */
 export const EscalateConfigSchema = z.object({
   slack: SlackConfigSchema,
@@ -60,6 +82,12 @@ export const EscalateConfigSchema = z.object({
   timeouts: TimeoutConfigSchema.default({ ...DEFAULT_TIMEOUTS }),
   escalationPolicies: EventEscalationConfigSchema.default({ ...DEFAULT_ESCALATION_POLICIES }),
   fallbackActions: FallbackActionsConfigSchema.default({ ...DEFAULT_FALLBACK_ACTIONS }),
+  autoApprovalRules: z.array(AutoApprovalRuleSchema).default([]),
+  quietHours: QuietHoursSchema.default({
+    ...DEFAULT_QUIET_HOURS,
+    criticalEvents: [...DEFAULT_QUIET_HOURS.criticalEvents],
+  }),
+  auditLog: AuditLogSchema.default({ enabled: true }),
 });
 
 /** Validated configuration type inferred from the Zod schema. */

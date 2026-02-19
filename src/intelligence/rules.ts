@@ -41,14 +41,14 @@ export function globToRegex(glob: string): RegExp {
   let i = 0;
 
   while (i < glob.length) {
-    const char = glob[i];
+    const char = glob.charAt(i);
 
-    if (char === '*' && glob[i + 1] === '*') {
+    if (char === '*' && glob.charAt(i + 1) === '*') {
       // `**` — match across path separators
       result += '.*';
       i += 2;
       // Skip trailing `/` after `**`
-      if (glob[i] === '/') {
+      if (glob.charAt(i) === '/') {
         i += 1;
       }
     } else if (char === '*') {
@@ -131,7 +131,8 @@ export function evaluateRules(
           };
         }
       }
-    } else if (rule.type === 'file_path') {
+    } else {
+      // rule.type === 'file_path'
       const paths = input.filePaths ?? [];
       const regex = globToRegex(rule.pattern);
       for (const filePath of paths) {
