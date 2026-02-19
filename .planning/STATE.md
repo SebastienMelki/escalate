@@ -10,30 +10,30 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 2 of 7 (State Store & IPC Bridge)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-02-19 — Completed 02-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Phase Complete
+Last activity: 2026-02-19 — Completed 02-02-PLAN.md
 
-Progress: [███░░░░░░░] 24%
+Progress: [████░░░░░░] 29%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 5min
-- Total execution time: 0.30 hours
+- Total execution time: 0.38 hours
 
 **By Phase:**
 
 | Phase                        | Plans | Total | Avg/Plan |
 | ---------------------------- | ----- | ----- | -------- |
 | 1-Foundation                 | 3/3   | 12min | 4min     |
-| 2-State Store & IPC Bridge   | 1/2   | 6min  | 6min     |
+| 2-State Store & IPC Bridge   | 2/2   | 11min | 5min     |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (7min), 01-02 (4min), 01-03 (1min), 02-01 (6min)
+- Last 5 plans: 01-01 (7min), 01-02 (4min), 01-03 (1min), 02-01 (6min), 02-02 (5min)
 - Trend: Stable
 
 _Updated after each plan completion_
@@ -56,6 +56,10 @@ Recent decisions affecting current work:
 - [02-01]: Used better-sqlite3 synchronous API with prepared statements for performance
 - [02-01]: Fallback defaults: deny for permission/preToolUse, ask-again for stop, allow for postToolUseFailure
 - [02-01]: Row-to-record mapping converts snake_case SQL columns to camelCase TypeScript interfaces
+- [02-02]: MCP tool callbacks are synchronous (store API is sync) -- no async/await needed
+- [02-02]: HTTP bridge uses raw Node.js http.createServer -- no framework for 3 localhost routes
+- [02-02]: Auto-start guard uses fileURLToPath + process.argv[1] to prevent server launch on library import
+- [02-02]: Port file written synchronously before accepting connections for race-free discovery
 
 ### Pending Todos
 
@@ -69,5 +73,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 02-01-PLAN.md (SQLite state store with fallback decisions)
-Resume file: .planning/phases/02-state-store-and-ipc-bridge/02-01-SUMMARY.md
+Stopped at: Completed 02-02-PLAN.md (MCP server + HTTP bridge + server entrypoint)
+Resume file: .planning/phases/02-state-store-and-ipc-bridge/02-02-SUMMARY.md

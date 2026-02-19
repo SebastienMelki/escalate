@@ -26,9 +26,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Response Routing
 
-- [ ] **IPC-01**: MCP server exposes local HTTP bridge endpoint for hook script communication (separate from stdio MCP protocol)
+- [x] **IPC-01**: MCP server exposes local HTTP bridge endpoint for hook script communication (separate from stdio MCP protocol)
 - [x] **IPC-02**: SQLite state store (better-sqlite3) tracks pending escalations by correlation ID with timestamps
-- [ ] **IPC-03**: Hook scripts poll SQLite for user response with configurable timeout (default 10 minutes for PermissionRequest)
+- [x] **IPC-03**: Hook scripts poll SQLite for user response with configurable timeout (default 10 minutes for PermissionRequest)
 - [ ] **IPC-04**: User response from Slack routes back to Claude Code — hook exits 0 (allow) or 2 (deny) with optional JSON payload
 - [x] **IPC-05**: Graceful timeout with configurable fallback decision per event type (allow, deny, or ask-again)
 - [ ] **IPC-06**: Slack interactive payloads acknowledged within 3 seconds independently of hook timeout
@@ -55,7 +55,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Platform & Plugin
 
-- [ ] **PLAT-01**: MCP server runs with stdio transport as Claude Code plugin process
+- [x] **PLAT-01**: MCP server runs with stdio transport as Claude Code plugin process
 - [x] **PLAT-02**: MessagingAdapter interface defined with sendEscalation, waitForResponse, sendFollowUp, isConnected methods
 - [ ] **PLAT-03**: Slack adapter implements full MessagingAdapter interface using @slack/bolt Socket Mode
 - [ ] **PLAT-04**: Plugin packaged as Claude Code plugin — plugin.json manifest, hooks.json, .mcp.json with ${CLAUDE_PLUGIN_ROOT} paths
@@ -115,9 +115,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SLCK-04     | Phase 3 | Pending  |
 | SLCK-05     | Phase 3 | Pending  |
 | SLCK-06     | Phase 3 | Pending  |
-| IPC-01      | Phase 2 | Pending  |
+| IPC-01      | Phase 2 | Complete |
 | IPC-02      | Phase 2 | Complete |
-| IPC-03      | Phase 2 | Pending  |
+| IPC-03      | Phase 2 | Complete |
 | IPC-04      | Phase 4 | Pending  |
 | IPC-05      | Phase 2 | Complete |
 | IPC-06      | Phase 4 | Pending  |
@@ -132,7 +132,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTL-05     | Phase 5 | Pending  |
 | MDIA-01     | Phase 6 | Pending  |
 | MDIA-02     | Phase 6 | Pending  |
-| PLAT-01     | Phase 2 | Pending  |
+| PLAT-01     | Phase 2 | Complete |
 | PLAT-02     | Phase 1 | Complete |
 | PLAT-03     | Phase 3 | Pending  |
 | PLAT-04     | Phase 7 | Pending  |
