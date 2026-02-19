@@ -73,13 +73,12 @@ Plans:
 3. Tapping a button in Slack resolves the corresponding pending escalation in SQLite within 3 seconds of the tap
 4. Typing a free-form text reply in the escalation thread resolves the pending escalation with the user's message as context
 5. On SessionStart, the plugin sends an "Escalate online" message to the configured channel and fails loudly if Slack credentials are invalid
-   **Plans**: TBD
+   **Plans**: 2 plans
 
 Plans:
 
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md — Block Kit message builder, Slack types, and unit tests
+- [ ] 03-02-PLAN.md — SlackAdapter class, handlers, server integration, startup validation
 
 ### Phase 4: Hook Scripts and Escalation Loop
 
@@ -163,7 +162,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | ----------------------------------- | -------------- | ----------- | --------- |
 | 1. Foundation                       | 3/3            | Complete    | 2026-02-18 |
 | 2. State Store and IPC Bridge       | 0/2            | Complete    | 2026-02-19 |
-| 3. Slack Adapter                    | 0/3            | Not started | -         |
+| 3. Slack Adapter                    | 0/2            | Not started | -         |
 | 4. Hook Scripts and Escalation Loop | 0/3            | Not started | -         |
 | 5. Escalation Intelligence          | 0/3            | Not started | -         |
 | 6. Multimodal Responses             | 0/2            | Not started | -         |
