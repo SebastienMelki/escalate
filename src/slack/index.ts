@@ -16,5 +16,10 @@ export { buildEscalationBlocks, buildConfirmationBlocks, buildFallbackText } fro
 export type { EscalationMessage, ButtonStyle, SlackAdapterState } from './types.js';
 
 // Handler registration
-export { registerActionHandler, registerMessageHandler } from './handlers.js';
+export {
+  registerActionHandler,
+  registerMessageHandler,
+  registerReactionHandler,
+  registerFileShareHandler,
+} from './handlers.js';
 export type { SlackAdapterCallbacks } from './handlers.js';

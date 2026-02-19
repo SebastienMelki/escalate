@@ -9,6 +9,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import Database from 'better-sqlite3';
 import { EscalationStore } from '../../src/state/store.js';
 import type { EscalationRequest } from '../../src/types/escalation.js';
+import type { EscalateConfig } from '../../src/config/schema.js';
 
 // --- Mock @slack/bolt ---
 
@@ -16,6 +17,8 @@ import type { EscalationRequest } from '../../src/types/escalation.js';
 let registeredActionHandlers: Array<{ pattern: RegExp; handler: (...args: unknown[]) => unknown }> =
   [];
 let registeredMessageHandlers: Array<(...args: unknown[]) => unknown> = [];
+let registeredEventHandlers: Array<{ event: string; handler: (...args: unknown[]) => unknown }> =
+  [];
 
 const mockPostMessage = vi.fn().mockResolvedValue({ ok: true, ts: 'mock.ts.1234' });
 const mockChatUpdate = vi.fn().mockResolvedValue({ ok: true });
@@ -39,6 +42,10 @@ vi.mock('@slack/bolt', () => {
 
     message(handler: (...args: unknown[]) => unknown): void {
       registeredMessageHandlers.push(handler);
+    }
+
+    event(eventName: string, handler: (...args: unknown[]) => unknown): void {
+      registeredEventHandlers.push({ event: eventName, handler });
     }
 
     start = mockStart;
@@ -80,6 +87,7 @@ describe('SlackAdapter', () => {
     // Reset handler registrations
     registeredActionHandlers = [];
     registeredMessageHandlers = [];
+    registeredEventHandlers = [];
 
     // Reset mocks
     vi.clearAllMocks();
@@ -87,12 +95,31 @@ describe('SlackAdapter', () => {
     mockAuthTest.mockResolvedValue({ ok: true, user: 'testbot', team: 'testteam' });
   });
 
-  function createAdapter(): InstanceType<typeof SlackAdapter> {
+  /** Minimal config with multimodal defaults for testing. */
+  const defaultConfig: EscalateConfig = {
+    slack: { channelId: 'C12345' },
+    timeouts: { permissionRequest: 600000, preToolUse: 300000, stop: 600000, postToolUseFailure: 60000 },
+    escalationPolicies: { permissionRequest: 'always', preToolUse: 'conditional', stop: 'always', postToolUseFailure: 'always' },
+    fallbackActions: { permissionRequest: 'deny', preToolUse: 'deny', stop: 'ask-again', postToolUseFailure: 'allow' },
+    autoApprovalRules: [],
+    quietHours: { enabled: false, start: '22:00', end: '07:00', timezone: 'UTC', criticalEvents: ['PermissionRequest', 'Stop'] },
+    multimodal: {
+      emojiReactions: {
+        enabled: true,
+        mapping: { white_check_mark: 'approve', x: 'deny' },
+      },
+      voiceNotes: { enabled: false, provider: 'whisper', maxDurationSeconds: 120, maxFileSizeMb: 10 },
+    },
+    auditLog: { enabled: true },
+  };
+
+  function createAdapter(configOverrides?: Partial<EscalateConfig>): InstanceType<typeof SlackAdapter> {
     return new SlackAdapter({
       botToken: 'xoxb-test-token',
       appToken: 'xapp-test-token',
       channelId: 'C12345',
       store,
+      config: { ...defaultConfig, ...configOverrides },
     });
   }
 

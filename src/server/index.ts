@@ -95,6 +95,7 @@ export async function startServer(options?: StartServerOptions): Promise<void> {
       appToken: secrets.slackAppToken,
       channelId: config.slack.channelId,
       store,
+      config,
     });
 
     try {

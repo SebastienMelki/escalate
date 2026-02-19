@@ -14,8 +14,15 @@ import type { KnownBlock } from '@slack/types';
 import type { MessagingAdapter } from '../types/adapter.js';
 import type { EscalationRequest, UserResponse } from '../types/escalation.js';
 import type { EscalationStore } from '../state/store.js';
+import type { TranscriptionProvider } from '../transcription/index.js';
+import type { EscalateConfig } from '../config/schema.js';
 import { buildEscalationBlocks, buildFallbackText } from './blocks.js';
-import { registerActionHandler, registerMessageHandler } from './handlers.js';
+import {
+  registerActionHandler,
+  registerMessageHandler,
+  registerReactionHandler,
+  registerFileShareHandler,
+} from './handlers.js';
 
 /** Configuration options for the SlackAdapter. */
 export interface SlackAdapterOptions {
@@ -23,6 +30,8 @@ export interface SlackAdapterOptions {
   readonly appToken: string;
   readonly channelId: string;
   readonly store: EscalationStore;
+  readonly config: EscalateConfig;
+  readonly transcriptionProvider?: TranscriptionProvider | undefined;
 }
 
 /**
@@ -36,6 +45,12 @@ export class SlackAdapter implements MessagingAdapter {
   private readonly app: App;
   private readonly channelId: string;
   private readonly store: EscalationStore;
+  private readonly config: EscalateConfig;
+  private readonly transcriptionProvider: TranscriptionProvider | undefined;
+  private readonly botToken: string;
+
+  /** Emoji name-to-action mapping built from config. */
+  private readonly emojiMapping: Map<string, string>;
 
   /** Bidirectional mapping: escalation ID <-> Slack message timestamp. */
   private readonly escalationToTs = new Map<string, string>();
@@ -56,6 +71,14 @@ export class SlackAdapter implements MessagingAdapter {
 
     this.channelId = options.channelId;
     this.store = options.store;
+    this.config = options.config;
+    this.transcriptionProvider = options.transcriptionProvider;
+    this.botToken = options.botToken;
+
+    // Build emoji mapping from config
+    this.emojiMapping = new Map<string, string>(
+      Object.entries(this.config.multimodal.emojiReactions.mapping),
+    );
 
     // Register Bolt event handlers with adapter callbacks
     const callbacks = {
@@ -65,10 +88,31 @@ export class SlackAdapter implements MessagingAdapter {
       onThreadReply: (threadTs: string, text: string): void => {
         this.handleThreadReply(threadTs, text);
       },
+      onReaction: (channelId: string, messageTs: string, emoji: string, userId: string): void => {
+        this.handleReaction(channelId, messageTs, emoji, userId);
+      },
+      onFileShare: (
+        threadTs: string,
+        fileId: string,
+        mimeType: string,
+        fileSize: number,
+        fileName: string,
+        downloadUrl: string,
+      ): void => {
+        this.handleFileShare(threadTs, fileId, mimeType, fileSize, fileName, downloadUrl);
+      },
     };
 
     registerActionHandler(this.app, callbacks);
     registerMessageHandler(this.app, callbacks);
+
+    // Conditionally register multimodal handlers
+    if (this.config.multimodal.emojiReactions.enabled) {
+      registerReactionHandler(this.app, callbacks);
+    }
+    if (this.config.multimodal.voiceNotes.enabled) {
+      registerFileShareHandler(this.app, callbacks);
+    }
   }
 
   /**
@@ -124,6 +168,158 @@ export class SlackAdapter implements MessagingAdapter {
     this.responseResolvers.delete(escalationId);
   }
 
+  /**
+   * Handle an emoji reaction on a Slack message.
+   *
+   * Looks up the escalation by message timestamp, checks the emoji mapping,
+   * resolves via store.resolve(), and calls the pending Promise resolver.
+   * Unrecognized emoji or reactions on non-escalation messages are silently ignored.
+   */
+  private handleReaction(
+    channelId: string,
+    messageTs: string,
+    emoji: string,
+    _userId: string,
+  ): void {
+    // Only handle reactions in our channel
+    if (channelId !== this.channelId) return;
+
+    // Look up escalation by message timestamp
+    const escalationId = this.tsToEscalation.get(messageTs);
+    if (!escalationId) return; // Not a tracked escalation message
+
+    // Look up action from emoji mapping
+    const decision = this.emojiMapping.get(emoji);
+    if (!decision) return; // Unrecognized emoji, silently ignore
+
+    // Resolve in store (idempotent, returns false if already resolved)
+    const resolved = this.store.resolve(
+      escalationId,
+      JSON.stringify({ type: 'reaction', emoji, actionId: decision }),
+    );
+    if (!resolved) return;
+
+    // Call pending Promise resolver
+    const resolver = this.responseResolvers.get(escalationId);
+    if (resolver) {
+      resolver({ type: 'reaction', emoji, actionId: decision, respondedAt: new Date() });
+    }
+
+    // Clean up maps
+    const ts = this.escalationToTs.get(escalationId);
+    if (ts) {
+      this.tsToEscalation.delete(ts);
+    }
+    this.escalationToTs.delete(escalationId);
+    this.responseResolvers.delete(escalationId);
+  }
+
+  /**
+   * Handle a file share in an escalation thread (synchronous dispatcher).
+   *
+   * Guards on escalation tracking, transcription provider availability, and
+   * file size limits. Fires and forgets the async voice note processing pipeline.
+   */
+  private handleFileShare(
+    threadTs: string,
+    _fileId: string,
+    mimeType: string,
+    fileSize: number,
+    fileName: string,
+    downloadUrl: string,
+  ): void {
+    // Look up escalation by thread timestamp
+    const escalationId = this.tsToEscalation.get(threadTs);
+    if (!escalationId) return; // Not a tracked escalation thread
+
+    // Voice notes not configured
+    if (!this.transcriptionProvider) return;
+
+    // File too large
+    if (fileSize > this.config.multimodal.voiceNotes.maxFileSizeMb * 1024 * 1024) return;
+
+    // Fire and forget the async processing pipeline
+    void this.processVoiceNote(
+      escalationId,
+      threadTs,
+      mimeType,
+      fileName,
+      downloadUrl,
+    ).catch((err: unknown) => {
+      console.error('[escalate] Voice note processing failed:', err);
+    });
+  }
+
+  /**
+   * Process a voice note: download, transcribe, and resolve the escalation.
+   *
+   * On transcription failure, posts a fallback thread reply asking the user
+   * to type instead, leaving the escalation pending.
+   */
+  private async processVoiceNote(
+    escalationId: string,
+    threadTs: string,
+    mimeType: string,
+    fileName: string,
+    downloadUrl: string,
+  ): Promise<void> {
+    try {
+      // Download audio from Slack
+      const audioBuffer = await this.downloadFile(downloadUrl);
+
+      // Transcribe using configured provider (guard checked in handleFileShare)
+      if (!this.transcriptionProvider) return;
+      const result = await this.transcriptionProvider.transcribe(audioBuffer, mimeType, fileName);
+
+      if (!result.text) {
+        throw new Error('Transcription returned empty text');
+      }
+
+      // Resolve in store
+      const resolved = this.store.resolve(
+        escalationId,
+        JSON.stringify({ type: 'voice', text: result.text }),
+      );
+      if (!resolved) return; // Already resolved by another handler
+
+      // Call pending Promise resolver (use 'text' type for downstream compatibility)
+      const resolver = this.responseResolvers.get(escalationId);
+      if (resolver) {
+        resolver({ type: 'text', text: result.text, respondedAt: new Date() });
+      }
+
+      // Clean up maps
+      const ts = this.escalationToTs.get(escalationId);
+      if (ts) {
+        this.tsToEscalation.delete(ts);
+      }
+      this.escalationToTs.delete(escalationId);
+      this.responseResolvers.delete(escalationId);
+    } catch (err: unknown) {
+      console.error('[escalate] Transcription failed:', err);
+
+      // Post fallback thread reply -- do NOT resolve the escalation
+      await this.app.client.chat.postMessage({
+        channel: this.channelId,
+        thread_ts: threadTs,
+        text: ':warning: Could not transcribe voice note. Please type your response instead.',
+      });
+    }
+  }
+
+  /**
+   * Download a file from Slack using the bot token for authentication.
+   */
+  private async downloadFile(url: string): Promise<Buffer> {
+    const response = await fetch(url, {
+      headers: { Authorization: 'Bearer ' + this.botToken },
+    });
+    if (!response.ok) {
+      throw new Error('Slack file download failed: ' + String(response.status));
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
+
   /** Start the Bolt App Socket Mode WebSocket connection. */
   async start(): Promise<void> {
     await this.app.start();
@@ -167,6 +363,22 @@ export class SlackAdapter implements MessagingAdapter {
       );
     }
     console.error(`[escalate] Posted startup message to channel ${this.channelId}`);
+
+    // Voice note prerequisite validation (warn but do not throw -- graceful degradation)
+    if (this.config.multimodal.voiceNotes.enabled) {
+      const apiKey =
+        process.env['ESCALATE_OPENAI_API_KEY'] ?? process.env['OPENAI_API_KEY'];
+      if (!apiKey) {
+        console.error(
+          '[escalate] WARNING: Voice notes enabled but ESCALATE_OPENAI_API_KEY not set. Voice note transcription will fail.',
+        );
+      }
+      if (!this.transcriptionProvider) {
+        console.error(
+          '[escalate] WARNING: Voice notes enabled but no transcription provider configured.',
+        );
+      }
+    }
   }
 
   /**
