@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Hook Interception
 
-- [x] **HOOK-01**: Plugin intercepts PermissionRequest events via hook script that receives JSON on stdin and returns decision via exit code
-- [x] **HOOK-02**: Plugin intercepts PreToolUse events to gate dangerous tool executions
-- [x] **HOOK-03**: Plugin intercepts Stop events to ask user about next steps before session ends
+- [ ] **HOOK-01**: Plugin intercepts PermissionRequest events via hook script that receives JSON on stdin and returns decision via exit code
+- [ ] **HOOK-02**: Plugin intercepts PreToolUse events to gate dangerous tool executions
+- [ ] **HOOK-03**: Plugin intercepts Stop events to ask user about next steps before session ends
 - [x] **HOOK-04**: Plugin intercepts PostToolUseFailure events to notify user of failures requiring attention
 - [x] **HOOK-05**: Hook scripts are thin dispatchers (<50 lines) that delegate all logic to MCP server via HTTP
 
@@ -22,14 +22,14 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SLCK-03**: Messages include rich GSD context — current phase, task name, what Claude was about to do, and why it needs a decision
 - [x] **SLCK-04**: MCP server maintains persistent Socket Mode WebSocket connection (no public URL required)
 - [x] **SLCK-05**: Follow-up context and status updates appear as threaded replies under the original escalation message
-- [x] **SLCK-06**: User can respond with free-form text in thread and Claude receives it as context
+- [ ] **SLCK-06**: User can respond with free-form text in thread and Claude receives it as context
 
 ### Response Routing
 
 - [x] **IPC-01**: MCP server exposes local HTTP bridge endpoint for hook script communication (separate from stdio MCP protocol)
 - [x] **IPC-02**: SQLite state store (better-sqlite3) tracks pending escalations by correlation ID with timestamps
 - [x] **IPC-03**: Hook scripts poll SQLite for user response with configurable timeout (default 10 minutes for PermissionRequest)
-- [x] **IPC-04**: User response from Slack routes back to Claude Code — hook exits 0 (allow) or 2 (deny) with optional JSON payload
+- [ ] **IPC-04**: User response from Slack routes back to Claude Code — hook exits 0 (allow) or 2 (deny) with optional JSON payload
 - [x] **IPC-05**: Graceful timeout with configurable fallback decision per event type (allow, deny, or ask-again)
 - [x] **IPC-06**: Slack interactive payloads acknowledged within 3 seconds independently of hook timeout
 
@@ -38,27 +38,27 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CFG-01**: All non-secret settings in escalate.config.json — escalation rules, channel preferences, timeout values
 - [x] **CFG-02**: Escalation triggers configurable per event type with policies: always escalate, never escalate, or conditional (pattern-based)
 - [x] **CFG-03**: Startup validation on SessionStart — verify Slack credentials, ping channel with "Escalate online" message, fail loudly if misconfigured
-- [x] **CFG-04**: All secrets via environment variables (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) — no hardcoded credentials
+- [ ] **CFG-04**: All secrets via environment variables (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) — no hardcoded credentials
 
 ### Intelligence
 
 - [x] **INTL-01**: Auto-approval rules match tool name patterns (e.g., auto-approve all Read tool calls)
 - [x] **INTL-02**: Auto-approval rules match file path patterns (e.g., auto-approve writes to test files)
-- [x] **INTL-03**: Audit log — append-only JSON file recording every escalation: timestamp, event type, message sent, response received, decision applied
+- [ ] **INTL-03**: Audit log — append-only JSON file recording every escalation: timestamp, event type, message sent, response received, decision applied
 - [x] **INTL-04**: Quiet hours — time-based escalation suppression with configurable schedule and timezone; only critical escalations (PermissionRequest, Stop) during quiet hours
 - [x] **INTL-05**: Session summary DM on TaskCompleted or Stop — phases completed, decisions made, notable events
 
 ### Multimodal
 
-- [x] **MDIA-01**: Voice note interpretation — download audio from Slack thread, send to Claude API for transcription, normalize to text response
-- [x] **MDIA-02**: Emoji reaction responses — configurable emoji-to-decision mapping (e.g., checkmark = approve, X = deny)
+- [ ] **MDIA-01**: Voice note interpretation — download audio from Slack thread, send to Claude API for transcription, normalize to text response
+- [ ] **MDIA-02**: Emoji reaction responses — configurable emoji-to-decision mapping (e.g., checkmark = approve, X = deny)
 
 ### Platform & Plugin
 
 - [x] **PLAT-01**: MCP server runs with stdio transport as Claude Code plugin process
 - [x] **PLAT-02**: MessagingAdapter interface defined with sendEscalation, waitForResponse, sendFollowUp, isConnected methods
-- [x] **PLAT-03**: Slack adapter implements full MessagingAdapter interface using @slack/bolt Socket Mode
-- [x] **PLAT-04**: Plugin packaged as Claude Code plugin — plugin.json manifest, hooks.json, .mcp.json with ${CLAUDE_PLUGIN_ROOT} paths
+- [ ] **PLAT-03**: Slack adapter implements full MessagingAdapter interface using @slack/bolt Socket Mode
+- [ ] **PLAT-04**: Plugin packaged as Claude Code plugin — plugin.json manifest, hooks.json, .mcp.json with ${CLAUDE_PLUGIN_ROOT} paths
 - [x] **PLAT-05**: All output bundled with tsup for self-contained distribution (no npm install needed post-install)
 - [x] **PLAT-06**: Aggressive TypeScript linting from day one — strict tsconfig (strict: true, noUncheckedIndexedAccess, exactOptionalPropertyTypes), ESLint with @typescript-eslint/strict, no-any rules, enforced from first commit
 
@@ -104,9 +104,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase   | Status   |
 | ----------- | ------- | -------- |
-| HOOK-01     | Phase 4 | Complete |
-| HOOK-02     | Phase 4 | Complete |
-| HOOK-03     | Phase 4 | Complete |
+| HOOK-01     | Phase 8 | Pending  |
+| HOOK-02     | Phase 8 | Pending  |
+| HOOK-03     | Phase 8 | Pending  |
 | HOOK-04     | Phase 4 | Complete |
 | HOOK-05     | Phase 4 | Complete |
 | SLCK-01     | Phase 3 | Complete |
@@ -114,28 +114,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SLCK-03     | Phase 3 | Complete |
 | SLCK-04     | Phase 3 | Complete |
 | SLCK-05     | Phase 3 | Complete |
-| SLCK-06     | Phase 3 | Complete |
+| SLCK-06     | Phase 8 | Pending  |
 | IPC-01      | Phase 2 | Complete |
 | IPC-02      | Phase 2 | Complete |
 | IPC-03      | Phase 2 | Complete |
-| IPC-04      | Phase 4 | Complete |
+| IPC-04      | Phase 8 | Pending  |
 | IPC-05      | Phase 2 | Complete |
 | IPC-06      | Phase 4 | Complete |
 | CFG-01      | Phase 1 | Complete |
 | CFG-02      | Phase 5 | Complete |
 | CFG-03      | Phase 3 | Complete |
-| CFG-04      | Phase 1 | Complete |
+| CFG-04      | Phase 9 | Pending  |
 | INTL-01     | Phase 5 | Complete |
 | INTL-02     | Phase 5 | Complete |
-| INTL-03     | Phase 5 | Complete |
+| INTL-03     | Phase 9 | Pending  |
 | INTL-04     | Phase 5 | Complete |
 | INTL-05     | Phase 5 | Complete |
-| MDIA-01     | Phase 6 | Complete |
-| MDIA-02     | Phase 6 | Complete |
+| MDIA-01     | Phase 8 | Pending  |
+| MDIA-02     | Phase 8 | Pending  |
 | PLAT-01     | Phase 2 | Complete |
 | PLAT-02     | Phase 1 | Complete |
-| PLAT-03     | Phase 3 | Complete |
-| PLAT-04     | Phase 7 | Complete |
+| PLAT-03     | Phase 9 | Pending  |
+| PLAT-04     | Phase 9 | Pending  |
 | PLAT-05     | Phase 7 | Complete |
 | PLAT-06     | Phase 1 | Complete |
 
@@ -143,6 +143,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 - v1 requirements: 34 total
 - Mapped to phases: 34
+- Complete: 23
+- Pending (gap closure): 11 (7 in Phase 8, 4 in Phase 9)
 - Unmapped: 0
 
 ---

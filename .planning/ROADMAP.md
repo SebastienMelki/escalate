@@ -20,6 +20,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Escalation Intelligence** - Auto-approval rules, rich GSD context in messages, audit logging, quiet hours, session summaries (completed 2026-02-19)
 - [x] **Phase 6: Multimodal Responses** - Voice note transcription via Claude API, emoji reaction mapping (completed 2026-02-19)
 - [x] **Phase 7: Plugin Packaging** - tsup bundling, plugin.json manifest, .mcp.json with CLAUDE_PLUGIN_ROOT paths, self-contained distribution (completed 2026-02-19)
+- [ ] **Phase 8: Fix UUID Mismatch in Escalation Loop** - Pass store record ID through EscalationRequest to SlackAdapter, fix button/thread/emoji/voice resolution path (Gap Closure)
+- [ ] **Phase 9: Config, Manifest, and Documentation Fixes** - Fix README env vars, .mcp.json passthrough, auditLog.enabled gate, version sync (Gap Closure)
 
 ## Phase Details
 
@@ -152,17 +154,53 @@ Plans:
 - [ ] 07-01-PLAN.md — Migrate better-sqlite3 to node:sqlite and configure tsup for self-contained bundling
 - [ ] 07-02-PLAN.md — Finalize plugin manifest and end-to-end plugin isolation validation
 
+### Phase 8: Fix UUID Mismatch in Escalation Loop
+
+**Goal**: The store record ID created by the HTTP bridge flows through to the Slack adapter, so user interactions in Slack (buttons, threads, emoji, voice) resolve the correct escalation record
+**Depends on**: Phase 7
+**Requirements**: IPC-04, HOOK-01, HOOK-02, HOOK-03, SLCK-06, MDIA-01, MDIA-02
+**Gap Closure:** Closes INT-01 + 2 broken flows from v1.0 audit
+**Success Criteria** (what must be TRUE):
+
+1. `EscalationRequest` type has an optional `id` field that the HTTP bridge populates with the store record's `escalation_id`
+2. `SlackAdapter.sendEscalation()` uses `request.id` (when present) instead of `randomUUID()` for button `action_id` encoding
+3. A button click in Slack resolves the same escalation ID that the hook script is polling — completing the full round-trip
+4. Thread replies, emoji reactions, and voice note handlers all resolve using the store record ID, not an independent UUID
+
+Plans:
+
+- [ ] 08-01-PLAN.md — Fix UUID round-trip: type change, http-bridge passthrough, SlackAdapter + handlers update, tests
+
+### Phase 9: Config, Manifest, and Documentation Fixes
+
+**Goal**: README, .mcp.json, config behavior, and version numbers are accurate and consistent
+**Depends on**: Phase 8
+**Requirements**: CFG-04, PLAT-03, INTL-03, PLAT-04
+**Gap Closure:** Closes INT-02, INT-03, INT-04, INT-05 from v1.0 audit
+**Success Criteria** (what must be TRUE):
+
+1. README documents correct env var names (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) and does not reference SLACK_SIGNING_SECRET
+2. `.mcp.json` env block includes ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN, and ESCALATE_OPENAI_API_KEY
+3. Setting `auditLog.enabled: false` in escalate.config.json prevents audit log entries from being written
+4. Version is `1.0.0` in plugin.json, package.json, and mcp-server.ts
+
+Plans:
+
+- [ ] 09-01-PLAN.md — Fix README, .mcp.json, audit log gate, version sync
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 
-| Phase                               | Plans Complete | Status      | Completed |
-| ----------------------------------- | -------------- | ----------- | --------- |
-| 1. Foundation                       | 3/3            | Complete    | 2026-02-18 |
-| 2. State Store and IPC Bridge       | 2/2            | Complete    | 2026-02-19 |
-| 3. Slack Adapter                    | 2/2            | Complete    | 2026-02-19 |
-| 4. Hook Scripts and Escalation Loop | 0/2            | Complete    | 2026-02-19 |
-| 5. Escalation Intelligence          | 0/3            | Complete    | 2026-02-19 |
-| 6. Multimodal Responses             | 0/2            | Complete    | 2026-02-19 |
-| 7. Plugin Packaging                 | 0/2            | Complete    | 2026-02-19 |
+| Phase                                    | Plans Complete | Status      | Completed  |
+| ---------------------------------------- | -------------- | ----------- | ---------- |
+| 1. Foundation                            | 3/3            | Complete    | 2026-02-18 |
+| 2. State Store and IPC Bridge            | 2/2            | Complete    | 2026-02-19 |
+| 3. Slack Adapter                         | 2/2            | Complete    | 2026-02-19 |
+| 4. Hook Scripts and Escalation Loop      | 0/2            | Complete    | 2026-02-19 |
+| 5. Escalation Intelligence               | 0/3            | Complete    | 2026-02-19 |
+| 6. Multimodal Responses                  | 0/2            | Complete    | 2026-02-19 |
+| 7. Plugin Packaging                      | 0/2            | Complete    | 2026-02-19 |
+| 8. Fix UUID Mismatch (Gap Closure)       | 0/1            | Not Started | —          |
+| 9. Config & Manifest Fixes (Gap Closure) | 0/1            | Not Started | —          |
