@@ -14,7 +14,7 @@ Escalate is built bottom-up along the dependency graph: shared types and ESM fou
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - ESM project skeleton, shared types, config schema, MessagingAdapter interface, strict TypeScript linting
-- [ ] **Phase 2: State Store and IPC Bridge** - SQLite state store for pending escalations, MCP server with HTTP bridge endpoint, polling-based response resolution
+- [x] **Phase 2: State Store and IPC Bridge** - SQLite state store for pending escalations, MCP server with HTTP bridge endpoint, polling-based response resolution (completed 2026-02-19)
 - [ ] **Phase 3: Slack Adapter** - Socket Mode connection, Block Kit messages with interactive buttons, threaded replies, startup validation
 - [ ] **Phase 4: Hook Scripts and Escalation Loop** - Thin hook dispatchers for all four event types, full end-to-end escalation round-trip, configurable timeouts
 - [ ] **Phase 5: Escalation Intelligence** - Auto-approval rules, rich GSD context in messages, audit logging, quiet hours, session summaries
@@ -162,7 +162,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | Phase                               | Plans Complete | Status      | Completed |
 | ----------------------------------- | -------------- | ----------- | --------- |
 | 1. Foundation                       | 3/3            | Complete    | 2026-02-18 |
-| 2. State Store and IPC Bridge       | 0/2            | Not started | -         |
+| 2. State Store and IPC Bridge       | 0/2            | Complete    | 2026-02-19 |
 | 3. Slack Adapter                    | 0/3            | Not started | -         |
 | 4. Hook Scripts and Escalation Loop | 0/3            | Not started | -         |
 | 5. Escalation Intelligence          | 0/3            | Not started | -         |
