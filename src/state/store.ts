@@ -93,7 +93,11 @@ export class EscalationStore {
       params.fallbackAction,
       params.timeoutSeconds,
     );
-    return this.getById(id)!;
+    const record = this.getById(id);
+    if (!record) {
+      throw new Error(`Failed to retrieve escalation after insert: ${id}`);
+    }
+    return record;
   }
 
   /** Get an escalation by its ID, or undefined if not found. */

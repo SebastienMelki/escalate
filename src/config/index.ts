@@ -22,4 +22,8 @@ export { loadConfig, loadSecrets } from './loader.js';
 export type { ConfigError, ConfigSecrets } from './loader.js';
 
 // Defaults
-export { DEFAULT_TIMEOUTS, DEFAULT_ESCALATION_POLICIES, DEFAULT_FALLBACK_ACTIONS } from './defaults.js';
+export {
+  DEFAULT_TIMEOUTS,
+  DEFAULT_ESCALATION_POLICIES,
+  DEFAULT_FALLBACK_ACTIONS,
+} from './defaults.js';

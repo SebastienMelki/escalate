@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, assert } from 'vitest';
 import Database from 'better-sqlite3';
 import type { Database as DatabaseType } from 'better-sqlite3';
 import { initializeDatabase } from '../../src/state/schema.js';
@@ -14,7 +14,10 @@ describe('initializeDatabase', () => {
       .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='escalations'")
       .all() as { name: string }[];
     expect(tables).toHaveLength(1);
-    expect(tables[0]!.name).toBe('escalations');
+
+    const first = tables[0];
+    assert(first !== undefined);
+    expect(first.name).toBe('escalations');
 
     db.close();
   });
@@ -39,9 +42,7 @@ describe('EscalationStore', () => {
       });
 
       expect(record.id).toBeDefined();
-      expect(record.id).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-      );
+      expect(record.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
       expect(record.status).toBe('pending');
       expect(record.eventType).toBe('permissionRequest');
       expect(record.requestJson).toBe('{"tool":"bash"}');
@@ -63,11 +64,11 @@ describe('EscalationStore', () => {
       });
 
       const fetched = store.getById(created.id);
-      expect(fetched).toBeDefined();
-      expect(fetched!.id).toBe(created.id);
-      expect(fetched!.eventType).toBe('preToolUse');
-      expect(fetched!.requestJson).toBe('{"action":"write"}');
-      expect(fetched!.fallbackAction).toBe('allow');
+      assert(fetched !== undefined);
+      expect(fetched.id).toBe(created.id);
+      expect(fetched.eventType).toBe('preToolUse');
+      expect(fetched.requestJson).toBe('{"action":"write"}');
+      expect(fetched.fallbackAction).toBe('allow');
     });
 
     it('returns undefined for a non-existent ID', () => {
@@ -89,9 +90,10 @@ describe('EscalationStore', () => {
       expect(resolved).toBe(true);
 
       const fetched = store.getById(created.id);
-      expect(fetched!.status).toBe('resolved');
-      expect(fetched!.responseJson).toBe('{"decision":"allow"}');
-      expect(fetched!.resolvedAt).toBeDefined();
+      assert(fetched !== undefined);
+      expect(fetched.status).toBe('resolved');
+      expect(fetched.responseJson).toBe('{"decision":"allow"}');
+      expect(fetched.resolvedAt).toBeDefined();
     });
 
     it('returns false when resolving an already-resolved escalation', () => {
@@ -127,7 +129,8 @@ describe('EscalationStore', () => {
 
       // Status should now be timed_out
       const fetched = store.getById(id);
-      expect(fetched!.status).toBe('timed_out');
+      assert(fetched !== undefined);
+      expect(fetched.status).toBe('timed_out');
     });
 
     it('returns null when escalation has not timed out', () => {
@@ -174,8 +177,10 @@ describe('EscalationStore', () => {
 
       const pending = store.getPending();
       expect(pending).toHaveLength(2);
-      expect(pending[0]!.requestJson).toBe('{"order":1}');
-      expect(pending[1]!.requestJson).toBe('{"order":2}');
+      expect(pending[0]).toBeDefined();
+      expect(pending[0]?.requestJson).toBe('{"order":1}');
+      expect(pending[1]).toBeDefined();
+      expect(pending[1]?.requestJson).toBe('{"order":2}');
     });
 
     it('returns empty array when no pending escalations', () => {
@@ -198,7 +203,8 @@ describe('EscalationStore', () => {
         expect(record.fallbackAction).toBe(action);
 
         const fetched = store.getById(record.id);
-        expect(fetched!.fallbackAction).toBe(action);
+        assert(fetched !== undefined);
+        expect(fetched.fallbackAction).toBe(action);
       },
     );
   });
