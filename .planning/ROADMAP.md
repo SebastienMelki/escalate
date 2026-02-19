@@ -183,10 +183,11 @@ Plans:
 2. `.mcp.json` env block includes ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN, and ESCALATE_OPENAI_API_KEY
 3. Setting `auditLog.enabled: false` in escalate.config.json prevents audit log entries from being written
 4. Version is `1.0.0` in plugin.json, package.json, and mcp-server.ts
+   **Plans**: 1 plan
 
 Plans:
 
-- [ ] 09-01-PLAN.md — Fix README, .mcp.json, audit log gate, version sync
+- [ ] 09-01-PLAN.md — Fix README env vars, .mcp.json passthrough, audit log gate, version sync
 
 ## Progress
 
