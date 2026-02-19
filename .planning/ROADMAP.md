@@ -96,8 +96,8 @@ Plans:
 
 Plans:
 
-- [ ] 04-01-PLAN.md — Shared bridge client library and HTTP bridge Slack adapter integration
-- [ ] 04-02-PLAN.md — Four hook scripts, hooks.json manifest, tsup config, and unit tests
+- [x] 04-01-PLAN.md — Shared bridge client library and HTTP bridge Slack adapter integration
+- [x] 04-02-PLAN.md — Four hook scripts, hooks.json manifest, tsup config, and unit tests
 
 ### Phase 5: Escalation Intelligence
 

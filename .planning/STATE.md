@@ -5,24 +5,24 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Run GSD end-to-end autonomously, escalating to the human through their phone only when a decision, approval, or intervention is actually required.
-**Current focus:** Phase 4: Hook Scripts and Escalation Loop (In Progress)
+**Current focus:** Phase 4: Hook Scripts and Escalation Loop (Complete)
 
 ## Current Position
 
 Phase: 4 of 7 (Hook Scripts and Escalation Loop)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-02-19 — Completed 04-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Phase Complete
+Last activity: 2026-02-19 — Completed 04-02-PLAN.md
 
-Progress: [██████░░░░] 57%
+Progress: [██████░░░░] 64%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 5min
-- Total execution time: 0.65 hours
+- Total execution time: 0.73 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [██████░░░░] 57%
 | 1-Foundation                 | 3/3   | 12min | 4min     |
 | 2-State Store & IPC Bridge   | 2/2   | 11min | 5min     |
 | 3-Slack Adapter              | 2/2   | 12min | 6min     |
-| 4-Hook Scripts & Escalation  | 1/2   | 4min  | 4min     |
+| 4-Hook Scripts & Escalation  | 2/2   | 9min  | 4.5min   |
 
 **Recent Trend:**
 
-- Last 5 plans: 02-01 (6min), 02-02 (5min), 03-01 (6min), 03-02 (6min), 04-01 (4min)
+- Last 5 plans: 02-02 (5min), 03-01 (6min), 03-02 (6min), 04-01 (4min), 04-02 (5min)
 - Trend: Stable
 
 _Updated after each plan completion_
@@ -73,6 +73,10 @@ Recent decisions affecting current work:
 - [04-01]: Conditional spread for exactOptionalPropertyTypes compatibility on optional EscalationContext fields
 - [04-01]: Fire-and-forget adapter.sendEscalation() does not block HTTP response to hook scripts
 - [04-01]: Added scripts/**/*.ts to tsconfig include for TypeScript checking of hook script libraries
+- [04-02]: Extracted output-helpers.ts for pure-function testability of response-to-JSON translation
+- [04-02]: Bracket notation for Record index access to satisfy noPropertyAccessFromIndexSignature
+- [04-02]: PreToolUse matcher Bash|Write|Edit restricts escalation to dangerous tools only
+- [04-02]: PostToolUseFailure uses async:true flag for fire-and-forget with 30s timeout
 
 ### Pending Todos
 
@@ -86,5 +90,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 04-01-PLAN.md (Bridge client library + Slack dispatch wiring -- 2 tasks, 8 new tests)
-Resume file: .planning/phases/04-hook-scripts-and-escalation-loop/04-01-SUMMARY.md
+Stopped at: Completed 04-02-PLAN.md (Hook scripts, hooks.json, output helpers -- 3 tasks, 14 new tests, 94 total)
+Resume file: .planning/phases/04-hook-scripts-and-escalation-loop/04-02-SUMMARY.md

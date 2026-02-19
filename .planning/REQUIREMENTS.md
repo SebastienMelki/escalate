@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Hook Interception
 
-- [ ] **HOOK-01**: Plugin intercepts PermissionRequest events via hook script that receives JSON on stdin and returns decision via exit code
-- [ ] **HOOK-02**: Plugin intercepts PreToolUse events to gate dangerous tool executions
-- [ ] **HOOK-03**: Plugin intercepts Stop events to ask user about next steps before session ends
-- [ ] **HOOK-04**: Plugin intercepts PostToolUseFailure events to notify user of failures requiring attention
+- [x] **HOOK-01**: Plugin intercepts PermissionRequest events via hook script that receives JSON on stdin and returns decision via exit code
+- [x] **HOOK-02**: Plugin intercepts PreToolUse events to gate dangerous tool executions
+- [x] **HOOK-03**: Plugin intercepts Stop events to ask user about next steps before session ends
+- [x] **HOOK-04**: Plugin intercepts PostToolUseFailure events to notify user of failures requiring attention
 - [x] **HOOK-05**: Hook scripts are thin dispatchers (<50 lines) that delegate all logic to MCP server via HTTP
 
 ### Slack Messaging
@@ -104,10 +104,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase   | Status   |
 | ----------- | ------- | -------- |
-| HOOK-01     | Phase 4 | Pending  |
-| HOOK-02     | Phase 4 | Pending  |
-| HOOK-03     | Phase 4 | Pending  |
-| HOOK-04     | Phase 4 | Pending  |
+| HOOK-01     | Phase 4 | Complete |
+| HOOK-02     | Phase 4 | Complete |
+| HOOK-03     | Phase 4 | Complete |
+| HOOK-04     | Phase 4 | Complete |
 | HOOK-05     | Phase 4 | Complete |
 | SLCK-01     | Phase 3 | Complete |
 | SLCK-02     | Phase 3 | Complete |
