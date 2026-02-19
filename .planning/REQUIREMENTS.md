@@ -28,7 +28,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **IPC-01**: MCP server exposes local HTTP bridge endpoint for hook script communication (separate from stdio MCP protocol)
 - [x] **IPC-02**: SQLite state store (better-sqlite3) tracks pending escalations by correlation ID with timestamps
-- [ ] **IPC-03**: Hook scripts poll SQLite for user response with configurable timeout (default 10 minutes for PermissionRequest)
+- [x] **IPC-03**: Hook scripts poll SQLite for user response with configurable timeout (default 10 minutes for PermissionRequest)
 - [x] **IPC-04**: User response from Slack routes back to Claude Code — hook exits 0 (allow) or 2 (deny) with optional JSON payload
 - [x] **IPC-05**: Graceful timeout with configurable fallback decision per event type (allow, deny, or ask-again)
 - [x] **IPC-06**: Slack interactive payloads acknowledged within 3 seconds independently of hook timeout
@@ -117,7 +117,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SLCK-06     | Phase 8 | Complete |
 | IPC-01      | Phase 2 | Complete |
 | IPC-02      | Phase 2 | Complete |
-| IPC-03      | Phase 11 | Pending |
+| IPC-03      | Phase 11 | Complete |
 | IPC-04      | Phase 8 | Complete |
 | IPC-05      | Phase 2 | Complete |
 | IPC-06      | Phase 4 | Complete |

@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Run GSD end-to-end autonomously, escalating to the human through their phone only when a decision, approval, or intervention is actually required.
-**Current focus:** Gap closure phases 10-11
+**Current focus:** All phases complete (11 of 11)
 
 ## Current Position
 
-Phase: 10 of 11 (Fix Multimodal Response Types)
+Phase: 11 of 11 (Read Hook Timeouts from Config)
 Plan: 1 of 1 in current phase
 Status: Complete
-Last activity: 2026-02-20 — Completed 10-01-PLAN.md
+Last activity: 2026-02-20 — Completed 11-01-PLAN.md
 
 Progress: [████████████████████] 100%
 
@@ -20,9 +20,9 @@ Progress: [████████████████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 19
+- Total plans completed: 20
 - Average duration: 5min
-- Total execution time: 1.55 hours
+- Total execution time: 1.58 hours
 
 **By Phase:**
 
@@ -38,10 +38,11 @@ Progress: [████████████████████] 100%
 | 8-Fix UUID Mismatch          | 1/1   | 3min  | 3min     |
 | 9-Config & Manifest Fixes    | 1/1   | 4min  | 4min     |
 | 10-Fix Multimodal Responses  | 1/1   | 2min  | 2min     |
+| 11-Read Hook Timeouts        | 1/1   | 2min  | 2min     |
 
 **Recent Trend:**
 
-- Last 5 plans: 07-01 (12min), 07-02 (4min), 08-01 (3min), 09-01 (4min), 10-01 (2min)
+- Last 5 plans: 07-02 (4min), 08-01 (3min), 09-01 (4min), 10-01 (2min), 11-01 (2min)
 - Trend: Stable
 
 _Updated after each plan completion_
@@ -52,6 +53,7 @@ _Updated after each plan completion_
 | Phase 08 P01 | 3min | 2 tasks | 5 files |
 | Phase 09 P01 | 4min | 3 tasks | 5 files |
 | Phase 10 P01 | 2min | 2 tasks | 2 files |
+| Phase 11 P01 | 2min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -121,6 +123,9 @@ Recent decisions affecting current work:
 - [10-01]: Voice notes without actionId default to DENY for PermissionRequest/PreToolUse (conservative safety default)
 - [10-01]: Voice text on Stop hooks routes as context (block stop with transcribed text) -- same as thread replies
 - [10-01]: No keyword-based voice intent parsing -- voice text is context, not a parseable decision
+- [11-01]: readTimeoutMs resolves config path using same CLAUDE_PROJECT_DIR pattern as readPort
+- [11-01]: Config values are milliseconds throughout; Math.ceil(ms/1000) conversion at call site for bridge timeout_seconds
+- [11-01]: Fixed preToolUse timeout_seconds/pollForResponse misalignment (was 300s bridge vs 600s poll default)
 
 ### Pending Todos
 
@@ -134,5 +139,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 10-01-PLAN.md (Fix multimodal response types in output-helpers)
-Resume file: .planning/phases/10-fix-multimodal-response-types/10-01-SUMMARY.md
+Stopped at: Completed 11-01-PLAN.md (Config-driven hook timeouts via readTimeoutMs)
+Resume file: .planning/phases/11-read-hook-timeouts-from-config/11-01-SUMMARY.md
