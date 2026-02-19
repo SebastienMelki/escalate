@@ -54,12 +54,12 @@ Plans:
 2. A pending escalation can be created in SQLite with a correlation ID and retrieved by that ID
 3. A hook script can POST to the HTTP bridge to create an escalation, then poll GET until a response appears or timeout expires
 4. When timeout expires without a response, a configurable fallback decision (allow/deny/ask-again) is returned
-   **Plans**: TBD
+   **Plans**: 2 plans
 
 Plans:
 
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — SQLite state store with escalation CRUD, fallback decision config (TDD)
+- [ ] 02-02-PLAN.md — MCP server (stdio), HTTP bridge, server entrypoint, plugin config
 
 ### Phase 3: Slack Adapter
 
