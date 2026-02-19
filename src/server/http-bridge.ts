@@ -293,6 +293,7 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
             ...(typeof toolName === 'string' ? { toolName } : {}),
           };
           const escalationRequest: EscalationRequest = {
+            id: record.id,
             title: `${event_type}: ${toolName ?? 'Unknown'}`,
             question: buildQuestionFromEvent(event_type, hookInput),
             urgency: event_type === 'PostToolUseFailure' ? 'warning' : 'critical',

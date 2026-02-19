@@ -28,6 +28,8 @@ export interface EscalationContext {
 
 /** A request to escalate something to the human. */
 export interface EscalationRequest {
+  /** Store record ID. When provided, the messaging adapter uses this instead of generating a new UUID. */
+  readonly id?: string;
   readonly title: string;
   readonly question: string;
   readonly urgency: UrgencyLevel;

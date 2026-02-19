@@ -389,7 +389,7 @@ export class SlackAdapter implements MessagingAdapter {
    * for routing future responses.
    */
   async sendEscalation(request: EscalationRequest): Promise<string> {
-    const escalationId = randomUUID();
+    const escalationId = request.id ?? randomUUID();
     const blocks = buildEscalationBlocks(request, escalationId);
     const text = buildFallbackText(request);
 
