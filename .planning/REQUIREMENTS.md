@@ -20,9 +20,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SLCK-01**: Escalation messages use Slack Block Kit formatting with structured layout (title, context, question, options)
 - [x] **SLCK-02**: Messages include interactive Approve/Deny/Snooze buttons for binary and multi-choice decisions
 - [x] **SLCK-03**: Messages include rich GSD context — current phase, task name, what Claude was about to do, and why it needs a decision
-- [ ] **SLCK-04**: MCP server maintains persistent Socket Mode WebSocket connection (no public URL required)
-- [ ] **SLCK-05**: Follow-up context and status updates appear as threaded replies under the original escalation message
-- [ ] **SLCK-06**: User can respond with free-form text in thread and Claude receives it as context
+- [x] **SLCK-04**: MCP server maintains persistent Socket Mode WebSocket connection (no public URL required)
+- [x] **SLCK-05**: Follow-up context and status updates appear as threaded replies under the original escalation message
+- [x] **SLCK-06**: User can respond with free-form text in thread and Claude receives it as context
 
 ### Response Routing
 
@@ -37,7 +37,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **CFG-01**: All non-secret settings in escalate.config.json — escalation rules, channel preferences, timeout values
 - [ ] **CFG-02**: Escalation triggers configurable per event type with policies: always escalate, never escalate, or conditional (pattern-based)
-- [ ] **CFG-03**: Startup validation on SessionStart — verify Slack credentials, ping channel with "Escalate online" message, fail loudly if misconfigured
+- [x] **CFG-03**: Startup validation on SessionStart — verify Slack credentials, ping channel with "Escalate online" message, fail loudly if misconfigured
 - [x] **CFG-04**: All secrets via environment variables (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) — no hardcoded credentials
 
 ### Intelligence
@@ -57,7 +57,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PLAT-01**: MCP server runs with stdio transport as Claude Code plugin process
 - [x] **PLAT-02**: MessagingAdapter interface defined with sendEscalation, waitForResponse, sendFollowUp, isConnected methods
-- [ ] **PLAT-03**: Slack adapter implements full MessagingAdapter interface using @slack/bolt Socket Mode
+- [x] **PLAT-03**: Slack adapter implements full MessagingAdapter interface using @slack/bolt Socket Mode
 - [ ] **PLAT-04**: Plugin packaged as Claude Code plugin — plugin.json manifest, hooks.json, .mcp.json with ${CLAUDE_PLUGIN_ROOT} paths
 - [ ] **PLAT-05**: All output bundled with tsup for self-contained distribution (no npm install needed post-install)
 - [x] **PLAT-06**: Aggressive TypeScript linting from day one — strict tsconfig (strict: true, noUncheckedIndexedAccess, exactOptionalPropertyTypes), ESLint with @typescript-eslint/strict, no-any rules, enforced from first commit
@@ -112,9 +112,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SLCK-01     | Phase 3 | Complete |
 | SLCK-02     | Phase 3 | Complete |
 | SLCK-03     | Phase 3 | Complete |
-| SLCK-04     | Phase 3 | Pending  |
-| SLCK-05     | Phase 3 | Pending  |
-| SLCK-06     | Phase 3 | Pending  |
+| SLCK-04     | Phase 3 | Complete |
+| SLCK-05     | Phase 3 | Complete |
+| SLCK-06     | Phase 3 | Complete |
 | IPC-01      | Phase 2 | Complete |
 | IPC-02      | Phase 2 | Complete |
 | IPC-03      | Phase 2 | Complete |
@@ -123,7 +123,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IPC-06      | Phase 4 | Pending  |
 | CFG-01      | Phase 1 | Complete |
 | CFG-02      | Phase 5 | Pending  |
-| CFG-03      | Phase 3 | Pending  |
+| CFG-03      | Phase 3 | Complete |
 | CFG-04      | Phase 1 | Complete |
 | INTL-01     | Phase 5 | Pending  |
 | INTL-02     | Phase 5 | Pending  |
@@ -134,7 +134,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MDIA-02     | Phase 6 | Pending  |
 | PLAT-01     | Phase 2 | Complete |
 | PLAT-02     | Phase 1 | Complete |
-| PLAT-03     | Phase 3 | Pending  |
+| PLAT-03     | Phase 3 | Complete |
 | PLAT-04     | Phase 7 | Pending  |
 | PLAT-05     | Phase 7 | Pending  |
 | PLAT-06     | Phase 1 | Complete |
