@@ -44,9 +44,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **INTL-01**: Auto-approval rules match tool name patterns (e.g., auto-approve all Read tool calls)
 - [x] **INTL-02**: Auto-approval rules match file path patterns (e.g., auto-approve writes to test files)
-- [ ] **INTL-03**: Audit log — append-only JSON file recording every escalation: timestamp, event type, message sent, response received, decision applied
+- [x] **INTL-03**: Audit log — append-only JSON file recording every escalation: timestamp, event type, message sent, response received, decision applied
 - [x] **INTL-04**: Quiet hours — time-based escalation suppression with configurable schedule and timezone; only critical escalations (PermissionRequest, Stop) during quiet hours
-- [ ] **INTL-05**: Session summary DM on TaskCompleted or Stop — phases completed, decisions made, notable events
+- [x] **INTL-05**: Session summary DM on TaskCompleted or Stop — phases completed, decisions made, notable events
 
 ### Multimodal
 
@@ -127,9 +127,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CFG-04      | Phase 1 | Complete |
 | INTL-01     | Phase 5 | Complete |
 | INTL-02     | Phase 5 | Complete |
-| INTL-03     | Phase 5 | Pending  |
+| INTL-03     | Phase 5 | Complete |
 | INTL-04     | Phase 5 | Complete |
-| INTL-05     | Phase 5 | Pending  |
+| INTL-05     | Phase 5 | Complete |
 | MDIA-01     | Phase 6 | Pending  |
 | MDIA-02     | Phase 6 | Pending  |
 | PLAT-01     | Phase 2 | Complete |
