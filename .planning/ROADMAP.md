@@ -78,7 +78,7 @@ Plans:
 Plans:
 
 - [x] 03-01-PLAN.md — Block Kit message builder, Slack types, and unit tests
-- [ ] 03-02-PLAN.md — SlackAdapter class, handlers, server integration, startup validation
+- [x] 03-02-PLAN.md — SlackAdapter class, handlers, server integration, startup validation
 
 ### Phase 4: Hook Scripts and Escalation Loop
 
@@ -92,13 +92,12 @@ Plans:
 3. A Stop event asks the user about next steps before the session ends
 4. A PostToolUseFailure event notifies the user of the failure in Slack
 5. Each hook script is under 50 lines, delegating all logic to the MCP server via HTTP
-   **Plans**: TBD
+   **Plans**: 2 plans
 
 Plans:
 
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
+- [ ] 04-01-PLAN.md — Shared bridge client library and HTTP bridge Slack adapter integration
+- [ ] 04-02-PLAN.md — Four hook scripts, hooks.json manifest, tsup config, and unit tests
 
 ### Phase 5: Escalation Intelligence
 
@@ -162,8 +161,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | ----------------------------------- | -------------- | ----------- | --------- |
 | 1. Foundation                       | 3/3            | Complete    | 2026-02-18 |
 | 2. State Store and IPC Bridge       | 2/2            | Complete    | 2026-02-19 |
-| 3. Slack Adapter                    | 1/2            | In Progress | -         |
-| 4. Hook Scripts and Escalation Loop | 0/3            | Not started | -         |
+| 3. Slack Adapter                    | 2/2            | Complete    | 2026-02-19 |
+| 4. Hook Scripts and Escalation Loop | 0/2            | Not started | -         |
 | 5. Escalation Intelligence          | 0/3            | Not started | -         |
 | 6. Multimodal Responses             | 0/2            | Not started | -         |
 | 7. Plugin Packaging                 | 0/2            | Not started | -         |
