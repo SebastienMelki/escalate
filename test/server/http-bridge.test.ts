@@ -9,6 +9,8 @@ import type { Server } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
 import { EscalationStore } from '../../src/state/store.js';
 import { createHttpBridge } from '../../src/server/http-bridge.js';
+import type { MessagingAdapter } from '../../src/types/adapter.js';
+import type { EscalationRequest } from '../../src/types/escalation.js';
 
 describe('HTTP Bridge', () => {
   let db: DatabaseSync;
@@ -144,5 +146,79 @@ describe('HTTP Bridge', () => {
 
     const body = (await res.json()) as { error: string };
     expect(body.error).toBe('not found');
+  });
+});
+
+describe('adapter integration', () => {
+  let adapterDb: DatabaseSync;
+  let adapterStore: EscalationStore;
+  let adapterServer: Server;
+  let adapterBaseUrl: string;
+  let capturedRequest: EscalationRequest | undefined;
+
+  const mockAdapter: MessagingAdapter = {
+    sendEscalation: (req) => {
+      capturedRequest = req;
+      return Promise.resolve(req.id ?? 'fallback');
+    },
+    waitForResponse: () => Promise.resolve({ type: 'timeout' as const, respondedAt: new Date() }),
+    sendFollowUp: () => Promise.resolve(),
+    isConnected: () => true,
+  };
+
+  beforeAll(async () => {
+    adapterDb = new DatabaseSync(':memory:');
+    adapterStore = new EscalationStore(adapterDb);
+    adapterServer = createHttpBridge({ store: adapterStore, adapter: mockAdapter });
+
+    await new Promise<void>((resolve) => {
+      adapterServer.listen(0, '127.0.0.1', () => {
+        const addr = adapterServer.address();
+        if (addr && typeof addr === 'object') {
+          adapterBaseUrl = `http://127.0.0.1:${String(addr.port)}`;
+        }
+        resolve();
+      });
+    });
+  });
+
+  afterAll(async () => {
+    await new Promise<void>((resolve, reject) => {
+      adapterServer.close((err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+    adapterDb.close();
+  });
+
+  it('passes store record ID to adapter.sendEscalation and store.resolve succeeds on that ID', async () => {
+    const res = await fetch(`${adapterBaseUrl}/escalations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_type: 'PermissionRequest',
+        request_json: JSON.stringify({ title: 'ID Test', question: 'Allow?' }),
+      }),
+    });
+
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { escalation_id: string; status: string };
+
+    // The adapter received the store record UUID
+    expect(capturedRequest?.id).toBe(body.escalation_id);
+
+    // Verify round-trip resolves via the same ID
+    const capturedId = capturedRequest?.id;
+    expect(capturedId).toBeDefined();
+    const resolved = adapterStore.resolve(
+      capturedId as string,
+      JSON.stringify({ type: 'action', actionId: 'approve' }),
+    );
+    expect(resolved).toBe(true);
+
+    // Verify the record is resolved
+    const record = adapterStore.getById(body.escalation_id);
+    expect(record?.status).toBe('resolved');
   });
 });
