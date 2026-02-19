@@ -6,21 +6,22 @@
  * CRITICAL: No console.log() — stdout is owned by Claude Code for JSON output.
  */
 import { readFileSync } from 'node:fs';
-import { readPort, createEscalation, pollForResponse } from './lib/bridge-client.js';
+import { readPort, createEscalation, pollForResponse, readTimeoutMs } from './lib/bridge-client.js';
 import { buildPermissionRequestOutput } from './lib/output-helpers.js';
 
 async function main(): Promise<void> {
   const input = JSON.parse(readFileSync('/dev/stdin', 'utf-8')) as Record<string, unknown>;
   const port = readPort();
+  const timeoutMs = readTimeoutMs('permissionRequest');
 
   const esc = await createEscalation(port, {
     event_type: 'PermissionRequest',
     request_json: JSON.stringify(input),
     fallback_action: 'deny',
-    timeout_seconds: 600,
+    timeout_seconds: Math.ceil(timeoutMs / 1000),
   });
 
-  const result = await pollForResponse(port, esc.escalation_id);
+  const result = await pollForResponse(port, esc.escalation_id, timeoutMs);
   process.stdout.write(buildPermissionRequestOutput(result));
   process.exit(0);
 }
