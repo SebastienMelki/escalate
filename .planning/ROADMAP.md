@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Escalation Intelligence** - Auto-approval rules, rich GSD context in messages, audit logging, quiet hours, session summaries (completed 2026-02-19)
 - [x] **Phase 6: Multimodal Responses** - Voice note transcription via Claude API, emoji reaction mapping (completed 2026-02-19)
 - [x] **Phase 7: Plugin Packaging** - tsup bundling, plugin.json manifest, .mcp.json with CLAUDE_PLUGIN_ROOT paths, self-contained distribution (completed 2026-02-19)
-- [ ] **Phase 8: Fix UUID Mismatch in Escalation Loop** - Pass store record ID through EscalationRequest to SlackAdapter, fix button/thread/emoji/voice resolution path (Gap Closure)
+- [x] **Phase 8: Fix UUID Mismatch in Escalation Loop** - Pass store record ID through EscalationRequest to SlackAdapter, fix button/thread/emoji/voice resolution path (Gap Closure) (completed 2026-02-19)
 - [ ] **Phase 9: Config, Manifest, and Documentation Fixes** - Fix README env vars, .mcp.json passthrough, auditLog.enabled gate, version sync (Gap Closure)
 
 ## Phase Details
@@ -202,5 +202,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 5. Escalation Intelligence               | 0/3            | Complete    | 2026-02-19 |
 | 6. Multimodal Responses                  | 0/2            | Complete    | 2026-02-19 |
 | 7. Plugin Packaging                      | 0/2            | Complete    | 2026-02-19 |
-| 8. Fix UUID Mismatch (Gap Closure)       | 0/1            | Not Started | —          |
+| 8. Fix UUID Mismatch (Gap Closure)       | 0/1            | Complete    | 2026-02-19 |
 | 9. Config & Manifest Fixes (Gap Closure) | 0/1            | Not Started | —          |
