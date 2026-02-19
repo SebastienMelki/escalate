@@ -15,13 +15,13 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - ESM project skeleton, shared types, config schema, MessagingAdapter interface, strict TypeScript linting
 - [x] **Phase 2: State Store and IPC Bridge** - SQLite state store for pending escalations, MCP server with HTTP bridge endpoint, polling-based response resolution (completed 2026-02-19)
-- [ ] **Phase 3: Slack Adapter** - Socket Mode connection, Block Kit messages with interactive buttons, threaded replies, startup validation
+- [x] **Phase 3: Slack Adapter** - Socket Mode connection, Block Kit messages with interactive buttons, threaded replies, startup validation
 - [x] **Phase 4: Hook Scripts and Escalation Loop** - Thin hook dispatchers for all four event types, full end-to-end escalation round-trip, configurable timeouts (completed 2026-02-19)
 - [x] **Phase 5: Escalation Intelligence** - Auto-approval rules, rich GSD context in messages, audit logging, quiet hours, session summaries (completed 2026-02-19)
 - [x] **Phase 6: Multimodal Responses** - Voice note transcription via Claude API, emoji reaction mapping (completed 2026-02-19)
 - [x] **Phase 7: Plugin Packaging** - tsup bundling, plugin.json manifest, .mcp.json with CLAUDE_PLUGIN_ROOT paths, self-contained distribution (completed 2026-02-19)
 - [x] **Phase 8: Fix UUID Mismatch in Escalation Loop** - Pass store record ID through EscalationRequest to SlackAdapter, fix button/thread/emoji/voice resolution path (Gap Closure) (completed 2026-02-19)
-- [ ] **Phase 9: Config, Manifest, and Documentation Fixes** - Fix README env vars, .mcp.json passthrough, auditLog.enabled gate, version sync (Gap Closure)
+- [x] **Phase 9: Config, Manifest, and Documentation Fixes** - Fix README env vars, .mcp.json passthrough, auditLog.enabled gate, version sync (Gap Closure) (completed 2026-02-19)
 
 ## Phase Details
 
@@ -117,9 +117,9 @@ Plans:
 
 Plans:
 
-- [ ] 05-01-PLAN.md — Auto-approval rules, quiet hours, config schema extension (TDD)
-- [ ] 05-02-PLAN.md — Audit log writer/reader, session summary builder (TDD)
-- [ ] 05-03-PLAN.md — HTTP bridge intelligence integration, TaskCompleted hook, summary dispatch
+- [x] 05-01-PLAN.md — Auto-approval rules, quiet hours, config schema extension (TDD)
+- [x] 05-02-PLAN.md — Audit log writer/reader, session summary builder (TDD)
+- [x] 05-03-PLAN.md — HTTP bridge intelligence integration, TaskCompleted hook, summary dispatch
 
 ### Phase 6: Multimodal Responses
 
@@ -134,8 +134,8 @@ Plans:
 
 Plans:
 
-- [ ] 06-01-PLAN.md — Extended types, multimodal config schema, TranscriptionProvider + WhisperTranscriptionProvider
-- [ ] 06-02-PLAN.md — Emoji reaction handler, voice note handler, Slack adapter integration, server startup wiring
+- [x] 06-01-PLAN.md — Extended types, multimodal config schema, TranscriptionProvider + WhisperTranscriptionProvider
+- [x] 06-02-PLAN.md — Emoji reaction handler, voice note handler, Slack adapter integration, server startup wiring
 
 ### Phase 7: Plugin Packaging
 
@@ -151,8 +151,8 @@ Plans:
 
 Plans:
 
-- [ ] 07-01-PLAN.md — Migrate better-sqlite3 to node:sqlite and configure tsup for self-contained bundling
-- [ ] 07-02-PLAN.md — Finalize plugin manifest and end-to-end plugin isolation validation
+- [x] 07-01-PLAN.md — Migrate better-sqlite3 to node:sqlite and configure tsup for self-contained bundling
+- [x] 07-02-PLAN.md — Finalize plugin manifest and end-to-end plugin isolation validation
 
 ### Phase 8: Fix UUID Mismatch in Escalation Loop
 
@@ -169,7 +169,7 @@ Plans:
 
 Plans:
 
-- [ ] 08-01-PLAN.md — Fix UUID round-trip: type change, http-bridge passthrough, SlackAdapter + handlers update, tests
+- [x] 08-01-PLAN.md — Fix UUID round-trip: type change, http-bridge passthrough, SlackAdapter + handlers update, tests
 
 ### Phase 9: Config, Manifest, and Documentation Fixes
 
@@ -187,7 +187,7 @@ Plans:
 
 Plans:
 
-- [ ] 09-01-PLAN.md — Fix README env vars, .mcp.json passthrough, audit log gate, version sync
+- [x] 09-01-PLAN.md — Fix README env vars, .mcp.json passthrough, audit log gate, version sync
 
 ## Progress
 
@@ -199,9 +199,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 1. Foundation                            | 3/3            | Complete    | 2026-02-18 |
 | 2. State Store and IPC Bridge            | 2/2            | Complete    | 2026-02-19 |
 | 3. Slack Adapter                         | 2/2            | Complete    | 2026-02-19 |
-| 4. Hook Scripts and Escalation Loop      | 0/2            | Complete    | 2026-02-19 |
-| 5. Escalation Intelligence               | 0/3            | Complete    | 2026-02-19 |
-| 6. Multimodal Responses                  | 0/2            | Complete    | 2026-02-19 |
-| 7. Plugin Packaging                      | 0/2            | Complete    | 2026-02-19 |
-| 8. Fix UUID Mismatch (Gap Closure)       | 0/1            | Complete    | 2026-02-19 |
-| 9. Config & Manifest Fixes (Gap Closure) | 0/1            | Not Started | —          |
+| 4. Hook Scripts and Escalation Loop      | 2/2            | Complete    | 2026-02-19 |
+| 5. Escalation Intelligence               | 3/3            | Complete    | 2026-02-19 |
+| 6. Multimodal Responses                  | 2/2            | Complete    | 2026-02-19 |
+| 7. Plugin Packaging                      | 2/2            | Complete    | 2026-02-19 |
+| 8. Fix UUID Mismatch (Gap Closure)       | 1/1            | Complete    | 2026-02-19 |
+| 9. Config & Manifest Fixes (Gap Closure) | 1/1            | Complete    | 2026-02-19 |

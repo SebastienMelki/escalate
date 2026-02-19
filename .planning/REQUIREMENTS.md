@@ -38,13 +38,13 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CFG-01**: All non-secret settings in escalate.config.json — escalation rules, channel preferences, timeout values
 - [x] **CFG-02**: Escalation triggers configurable per event type with policies: always escalate, never escalate, or conditional (pattern-based)
 - [x] **CFG-03**: Startup validation on SessionStart — verify Slack credentials, ping channel with "Escalate online" message, fail loudly if misconfigured
-- [ ] **CFG-04**: All secrets via environment variables (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) — no hardcoded credentials
+- [x] **CFG-04**: All secrets via environment variables (ESCALATE_SLACK_BOT_TOKEN, ESCALATE_SLACK_APP_TOKEN) — no hardcoded credentials
 
 ### Intelligence
 
 - [x] **INTL-01**: Auto-approval rules match tool name patterns (e.g., auto-approve all Read tool calls)
 - [x] **INTL-02**: Auto-approval rules match file path patterns (e.g., auto-approve writes to test files)
-- [ ] **INTL-03**: Audit log — append-only JSON file recording every escalation: timestamp, event type, message sent, response received, decision applied
+- [x] **INTL-03**: Audit log — append-only JSON file recording every escalation: timestamp, event type, message sent, response received, decision applied
 - [x] **INTL-04**: Quiet hours — time-based escalation suppression with configurable schedule and timezone; only critical escalations (PermissionRequest, Stop) during quiet hours
 - [x] **INTL-05**: Session summary DM on TaskCompleted or Stop — phases completed, decisions made, notable events
 
@@ -57,8 +57,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PLAT-01**: MCP server runs with stdio transport as Claude Code plugin process
 - [x] **PLAT-02**: MessagingAdapter interface defined with sendEscalation, waitForResponse, sendFollowUp, isConnected methods
-- [ ] **PLAT-03**: Slack adapter implements full MessagingAdapter interface using @slack/bolt Socket Mode
-- [ ] **PLAT-04**: Plugin packaged as Claude Code plugin — plugin.json manifest, hooks.json, .mcp.json with ${CLAUDE_PLUGIN_ROOT} paths
+- [x] **PLAT-03**: Slack adapter implements full MessagingAdapter interface using @slack/bolt Socket Mode
+- [x] **PLAT-04**: Plugin packaged as Claude Code plugin — plugin.json manifest, hooks.json, .mcp.json with ${CLAUDE_PLUGIN_ROOT} paths
 - [x] **PLAT-05**: All output bundled with tsup for self-contained distribution (no npm install needed post-install)
 - [x] **PLAT-06**: Aggressive TypeScript linting from day one — strict tsconfig (strict: true, noUncheckedIndexedAccess, exactOptionalPropertyTypes), ESLint with @typescript-eslint/strict, no-any rules, enforced from first commit
 
@@ -124,18 +124,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CFG-01      | Phase 1 | Complete |
 | CFG-02      | Phase 5 | Complete |
 | CFG-03      | Phase 3 | Complete |
-| CFG-04      | Phase 9 | Pending  |
+| CFG-04      | Phase 9 | Complete |
 | INTL-01     | Phase 5 | Complete |
 | INTL-02     | Phase 5 | Complete |
-| INTL-03     | Phase 9 | Pending  |
+| INTL-03     | Phase 9 | Complete |
 | INTL-04     | Phase 5 | Complete |
 | INTL-05     | Phase 5 | Complete |
 | MDIA-01     | Phase 8 | Complete |
 | MDIA-02     | Phase 8 | Complete |
 | PLAT-01     | Phase 2 | Complete |
 | PLAT-02     | Phase 1 | Complete |
-| PLAT-03     | Phase 9 | Pending  |
-| PLAT-04     | Phase 9 | Pending  |
+| PLAT-03     | Phase 9 | Complete |
+| PLAT-04     | Phase 9 | Complete |
 | PLAT-05     | Phase 7 | Complete |
 | PLAT-06     | Phase 1 | Complete |
 

@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Run GSD end-to-end autonomously, escalating to the human through their phone only when a decision, approval, or intervention is actually required.
-**Current focus:** Gap closure phases complete
+**Current focus:** All phases complete (v1.0 ready)
 
 ## Current Position
 
-Phase: 8 of 8 (Fix UUID Mismatch)
+Phase: 9 of 9 (Config & Manifest Fixes)
 Plan: 1 of 1 in current phase
 Status: Complete
-Last activity: 2026-02-19 — Completed 08-01-PLAN.md
+Last activity: 2026-02-19 — Completed 09-01-PLAN.md
 
 Progress: [████████████████] 100%
 
@@ -20,9 +20,9 @@ Progress: [████████████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 17
+- Total plans completed: 18
 - Average duration: 5min
-- Total execution time: 1.45 hours
+- Total execution time: 1.52 hours
 
 **By Phase:**
 
@@ -36,10 +36,11 @@ Progress: [████████████████] 100%
 | 6-Multimodal Responses       | 2/2   | 9min  | 4.5min   |
 | 7-Plugin Packaging           | 2/2   | 16min | 8min     |
 | 8-Fix UUID Mismatch          | 1/1   | 3min  | 3min     |
+| 9-Config & Manifest Fixes    | 1/1   | 4min  | 4min     |
 
 **Recent Trend:**
 
-- Last 5 plans: 06-01 (4min), 06-02 (5min), 07-01 (12min), 07-02 (4min), 08-01 (3min)
+- Last 5 plans: 06-02 (5min), 07-01 (12min), 07-02 (4min), 08-01 (3min), 09-01 (4min)
 - Trend: Stable
 
 _Updated after each plan completion_
@@ -48,6 +49,7 @@ _Updated after each plan completion_
 | Phase 07 P01 | 12min | 2 tasks | 9 files |
 | Phase 07 P02 | 4min | 2 tasks | 7 files |
 | Phase 08 P01 | 3min | 2 tasks | 5 files |
+| Phase 09 P01 | 4min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -110,6 +112,9 @@ Recent decisions affecting current work:
 - [07-02]: Fixed pre-existing lint errors across 5 files to ensure full quality gate passes for distribution-ready plugin
 - [08-01]: Optional id field on EscalationRequest with request.id ?? randomUUID() fallback preserves backward compatibility
 - [08-01]: No id: undefined anywhere due to exactOptionalPropertyTypes -- http-bridge always has record.id as a string
+- [09-01]: auditLog.enabled defaults to true via nullish coalescing when config unavailable
+- [09-01]: SLACK_SIGNING_SECRET removed entirely (never used by Socket Mode implementation)
+- [09-01]: files:read scope added to README Bot Token Scopes for voice note download
 
 ### Pending Todos
 
@@ -123,5 +128,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 08-01-PLAN.md (Fix UUID mismatch -- escalation round-trip now uses single ID)
-Resume file: .planning/phases/08-fix-uuid-mismatch/08-01-SUMMARY.md
+Stopped at: Completed 09-01-PLAN.md (Config & manifest fixes -- env vars, audit gate, version sync)
+Resume file: .planning/phases/09-config-manifest-fixes/09-01-SUMMARY.md
