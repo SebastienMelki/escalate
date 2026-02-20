@@ -7,16 +7,12 @@
  */
 import { readPort, requestSummary } from './lib/bridge-client.js';
 
-function main(): void {
+async function main(): Promise<void> {
   // Read stdin (TaskCompleted event has task_id, task_subject, task_description)
   // We don't use these fields -- just trigger the summary.
   const port = readPort();
-  void requestSummary(port).catch(() => {});
+  await requestSummary(port).catch(() => {});
   process.exit(0);
 }
 
-try {
-  main();
-} catch {
-  process.exit(0);
-}
+main().catch(() => process.exit(0));

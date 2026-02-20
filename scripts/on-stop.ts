@@ -33,8 +33,8 @@ async function main(): Promise<void> {
     process.stdout.write(output);
   }
 
-  // Fire-and-forget session summary after escalation resolution
-  void requestSummary(port).catch(() => {});
+  // Await session summary so it completes before process.exit
+  await requestSummary(port).catch(() => {});
 
   process.exit(0);
 }

@@ -19,7 +19,7 @@
           {
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/dist/scripts/on-pre-tool-use.js",
-            "timeout": 300
+            "timeout": 320
           }
         ]
       }
