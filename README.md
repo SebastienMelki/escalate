@@ -2,7 +2,26 @@
 
 A Claude Code plugin that bridges Claude Code and Slack, letting you monitor and control autonomous coding sessions from your phone.
 
-Claude Code events (permission requests, tool failures, session stops) get forwarded to a Slack channel as rich interactive messages. You tap Approve/Deny buttons or type a reply in the thread, and your decision flows back to Claude instantly.
+## Why Escalate?
+
+Without Escalate, running Claude Code autonomously means one of two things:
+
+**Sitting at your computer watching.** Claude stops every few minutes to ask for permission — "Can I run this Bash command?", "Can I write this file?" You're glued to your screen, clicking Approve over and over. You can't step away for coffee, take a walk, or do anything else. You're basically a human rubber stamp.
+
+**Using Teleport (remote sessions).** Claude Code's Teleport feature lets you push sessions to the cloud and check back later. But there's a catch: when Claude hits a decision point, it just *waits*. Silently. You have no idea it's blocked until you manually check in. If Claude needs permission at minute 3 of a 30-minute task, the remaining 27 minutes are wasted — it's sitting idle while you assume it's still working. There's no notification, no ping, no way to know.
+
+**With Escalate, you get a third option.** Start Claude on a big task, put your phone in your pocket, and walk away. When Claude actually needs you — a permission approval, a decision about approach, a failure that needs attention — your phone buzzes with a Slack message. You glance at it, tap Approve, and Claude keeps going. The rest of the time? Silence. No notification noise, no screen-watching, no checking in.
+
+### What it looks like
+
+1. You kick off a task: `claude "refactor the auth module"`
+2. Claude works autonomously — reading files, planning, writing code
+3. Claude needs to run `rm -rf old-auth/` → your phone buzzes
+4. You see: **"PreToolUse: Bash"** with the command and context
+5. You tap **Approve** → Claude continues instantly
+6. 10 minutes later, Claude finishes — you get a session summary DM
+
+That's it. You were making lunch the whole time.
 
 ## How It Works
 
