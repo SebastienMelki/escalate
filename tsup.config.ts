@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsup';
+import { builtinModules } from 'node:module';
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -24,6 +25,7 @@ export default defineConfig({
   entry: {
     'index': 'src/index.ts',
     'server/index': 'src/server/index.ts',
+    'server/main': 'src/server/main.ts',
     'scripts/on-permission-request': 'scripts/on-permission-request.ts',
     'scripts/on-pre-tool-use': 'scripts/on-pre-tool-use.ts',
     'scripts/on-stop': 'scripts/on-stop.ts',
@@ -41,6 +43,12 @@ export default defineConfig({
   // The regex matches any module that is NOT a node: prefixed builtin,
   // so npm packages get bundled while node:fs, node:sqlite etc. stay external.
   noExternal: [/^(?!node:)/],
+  // Inject a real require() for CJS dependencies like @slack/bolt that
+  // call require('util'), require('http'), etc. without the node: prefix.
+  // Without this, esbuild's ESM CJS-compat shim throws "Dynamic require not supported".
+  banner: {
+    js: "import { createRequire as __escalate_cjsRequire } from 'node:module'; var require = __escalate_cjsRequire(import.meta.url);",
+  },
   // Fix esbuild stripping node: prefix from node:sqlite imports.
   // node:sqlite is the only builtin that requires the prefix.
   onSuccess: () => {

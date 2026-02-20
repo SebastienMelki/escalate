@@ -19,7 +19,7 @@ import { EscalationStore } from '../state/store.js';
 import { createMcpServer } from './mcp-server.js';
 import { createHttpBridge, type HttpBridgeOptions } from './http-bridge.js';
 import { SlackAdapter } from '../slack/adapter.js';
-import { loadConfig, loadSecrets } from '../config/index.js';
+import { loadConfig, loadSecrets, loadDotEnv } from '../config/index.js';
 import { isOk } from '../errors/result.js';
 import type { TranscriptionProvider } from '../transcription/index.js';
 import { WhisperTranscriptionProvider } from '../transcription/whisper.js';
@@ -47,6 +47,9 @@ export interface StartServerOptions {
  * 5. Writes port file for hook script discovery
  */
 export async function startServer(options?: StartServerOptions): Promise<void> {
+  // Load .env file before anything else (shell env takes precedence)
+  loadDotEnv();
+
   const projectDir = process.env['CLAUDE_PROJECT_DIR'] ?? process.cwd();
   const dbPath = options?.dbPath ?? join(projectDir, '.claude', 'escalate.db');
 

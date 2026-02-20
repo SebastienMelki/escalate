@@ -11,6 +11,45 @@ import type { EscalateConfig } from './schema.js';
 import { ok, err } from '../errors/result.js';
 import type { Result } from '../errors/result.js';
 
+/**
+ * Load a .env file and set variables on process.env.
+ *
+ * Only sets variables that are not already present in the environment,
+ * so shell-exported vars always take precedence over the file.
+ *
+ * @param envPath - Path to .env file. Defaults to `.env` in the project dir.
+ */
+export function loadDotEnv(envPath?: string): void {
+  const projectDir = process.env['CLAUDE_PROJECT_DIR'] ?? process.cwd();
+  const resolvedPath = envPath ?? resolve(projectDir, '.env');
+
+  if (!existsSync(resolvedPath)) return;
+
+  const contents = readFileSync(resolvedPath, 'utf-8');
+  for (const line of contents.split('\n')) {
+    const trimmed = line.trim();
+    // Skip empty lines and comments
+    if (trimmed === '' || trimmed.startsWith('#')) continue;
+
+    const eqIndex = trimmed.indexOf('=');
+    if (eqIndex === -1) continue;
+
+    const key = trimmed.slice(0, eqIndex).trim();
+    let value = trimmed.slice(eqIndex + 1).trim();
+
+    // Strip surrounding quotes
+    if ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+
+    // Don't overwrite existing env vars (shell takes precedence)
+    if (process.env[key] === undefined || process.env[key] === '') {
+      process.env[key] = value;
+    }
+  }
+}
+
 /** Structured error returned by config loading operations. */
 export interface ConfigError {
   readonly code: 'FILE_NOT_FOUND' | 'INVALID_JSON' | 'VALIDATION_FAILED' | 'MISSING_ENV_VAR';

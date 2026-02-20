@@ -18,7 +18,7 @@ export {
 export type { EscalateConfig } from './schema.js';
 
 // Loader
-export { loadConfig, loadSecrets } from './loader.js';
+export { loadConfig, loadSecrets, loadDotEnv } from './loader.js';
 export type { ConfigError, ConfigSecrets } from './loader.js';
 
 // Defaults
