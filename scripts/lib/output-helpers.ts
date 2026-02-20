@@ -32,6 +32,16 @@ function isApprovalDecision(response: ParsedResponse): boolean {
 }
 
 /**
+ * Check if the response is a snooze decision.
+ * Both button clicks (type:'action') and emoji reactions (type:'reaction') carry actionId.
+ */
+function isSnoozeDecision(response: ParsedResponse): boolean {
+  return (
+    (response.type === 'action' || response.type === 'reaction') && response.actionId === 'snooze'
+  );
+}
+
+/**
  * Check if the response indicates "continue" for Stop hooks.
  * Both button clicks and emoji reactions can map to the 'continue' actionId.
  */
@@ -65,6 +75,14 @@ export function buildPermissionRequestOutput(result: EscalationResult): string {
       hookSpecificOutput: { hookEventName: 'PermissionRequest', decision: { behavior: 'allow' } },
     });
   }
+  if (response && isSnoozeDecision(response)) {
+    return JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PermissionRequest',
+        decision: { behavior: 'deny', message: 'Snoozed by user via Escalate' },
+      },
+    });
+  }
   // Voice notes without actionId default to deny (conservative)
   return JSON.stringify({
     hookSpecificOutput: {
@@ -80,6 +98,15 @@ export function buildPreToolUseOutput(result: EscalationResult): string {
   if (response && isApprovalDecision(response)) {
     return JSON.stringify({
       hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'allow' },
+    });
+  }
+  if (response && isSnoozeDecision(response)) {
+    return JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
+        permissionDecision: 'deny',
+        permissionDecisionReason: 'Snoozed by user via Escalate',
+      },
     });
   }
   return JSON.stringify({

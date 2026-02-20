@@ -89,6 +89,20 @@ describe('hook output helpers', () => {
 
       expect(specific.decision.behavior).toBe('deny');
     });
+
+    it('returns deny with snooze message when user snoozes', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'action', actionId: 'snooze' }),
+      };
+
+      const output = JSON.parse(buildPermissionRequestOutput(result)) as Record<string, unknown>;
+      const specific = (output as { hookSpecificOutput: { decision: { behavior: string; message: string } } })
+        .hookSpecificOutput;
+
+      expect(specific.decision.behavior).toBe('deny');
+      expect(specific.decision.message).toBe('Snoozed by user via Escalate');
+    });
   });
 
   describe('buildPreToolUseOutput', () => {
@@ -170,6 +184,21 @@ describe('hook output helpers', () => {
       const specific = (output as { hookSpecificOutput: { permissionDecision: string } }).hookSpecificOutput;
 
       expect(specific.permissionDecision).toBe('deny');
+    });
+
+    it('returns deny with snooze reason when user snoozes', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'action', actionId: 'snooze' }),
+      };
+
+      const output = JSON.parse(buildPreToolUseOutput(result)) as Record<string, unknown>;
+      const specific = (
+        output as { hookSpecificOutput: { permissionDecision: string; permissionDecisionReason: string } }
+      ).hookSpecificOutput;
+
+      expect(specific.permissionDecision).toBe('deny');
+      expect(specific.permissionDecisionReason).toBe('Snoozed by user via Escalate');
     });
   });
 
@@ -285,6 +314,15 @@ describe('hook output helpers', () => {
         decision: 'block',
         reason: 'continue',
       });
+    });
+
+    it('returns null (allow stop) when snooze action received (snooze not applicable to Stop)', () => {
+      const result: EscalationResult = {
+        status: 'resolved',
+        responseJson: JSON.stringify({ type: 'action', actionId: 'snooze' }),
+      };
+
+      expect(buildStopOutput(result)).toBeNull();
     });
   });
 

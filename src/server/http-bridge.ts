@@ -84,6 +84,7 @@ function buildActionsForEvent(eventType: string): SuggestedAction[] {
       return [
         { id: 'approve', label: 'Approve', style: 'primary' },
         { id: 'deny', label: 'Deny', style: 'danger' },
+        { id: 'snooze', label: 'Snooze' },
       ];
     case 'Stop':
       return [
@@ -293,6 +294,7 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
           const context: EscalationRequest['context'] = {
             eventType: event_type,
             ...(typeof toolName === 'string' ? { toolName } : {}),
+            ...(filePaths.length > 0 ? { filePaths } : {}),
           };
           const escalationRequest: EscalationRequest = {
             id: record.id,
