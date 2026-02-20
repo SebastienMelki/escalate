@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 9: Config, Manifest, and Documentation Fixes** - Fix README env vars, .mcp.json passthrough, auditLog.enabled gate, version sync (Gap Closure) (completed 2026-02-19)
 - [x] **Phase 10: Fix Multimodal Response Types in Hook Output** - Handle 'reaction' and 'voice' response types in output-helpers.ts so emoji and voice note approvals complete the E2E loop (Gap Closure) (completed 2026-02-19)
 - [x] **Phase 11: Read Hook Timeouts from Config** - Hook scripts read timeout_seconds from escalate.config.json instead of hardcoding values (Gap Closure) (completed 2026-02-19)
-- [ ] **Phase 12: Fix Session Summary, Snooze, and Message Context** - Await session summary before process.exit, add Snooze button to escalation actions, pass filePaths to Slack message context, fix PreToolUse timeout race (Gap Closure)
+- [x] **Phase 12: Fix Session Summary, Snooze, and Message Context** - Await session summary before process.exit, add Snooze button to escalation actions, pass filePaths to Slack message context, fix PreToolUse timeout race (Gap Closure) (completed 2026-02-20)
 
 ## Phase Details
 
@@ -262,4 +262,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 9. Config & Manifest Fixes (Gap Closure) | 1/1            | Complete    | 2026-02-19 |
 | 10. Fix Multimodal Response Types (Gap Closure) | 1/1 | Complete    | 2026-02-19 |
 | 11. Read Hook Timeouts from Config (Gap Closure) | 1/1 | Complete    | 2026-02-19 |
-| 12. Fix Summary, Snooze, Context (Gap Closure) | 0/0 | Not Started | — |
+| 12. Fix Summary, Snooze, Context (Gap Closure) | 1/1 | Complete   | 2026-02-20 |
