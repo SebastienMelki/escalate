@@ -24,6 +24,9 @@ export interface AuditEntry {
   readonly messagePreview?: string;
   readonly responseJson?: string;
   readonly escalationId?: string;
+  readonly triageMethod?: 'llm' | 'heuristic';
+  readonly triageConfidence?: 'high' | 'medium' | 'low';
+  readonly triageNeedsHumanInput?: boolean;
 }
 
 /**

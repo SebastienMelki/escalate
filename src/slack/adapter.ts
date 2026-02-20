@@ -16,7 +16,14 @@ import type { EscalationRequest, UserResponse } from '../types/escalation.js';
 import type { EscalationStore } from '../state/store.js';
 import type { TranscriptionProvider } from '../transcription/index.js';
 import type { EscalateConfig } from '../config/schema.js';
-import { buildEscalationBlocks, buildFallbackText } from './blocks.js';
+import {
+  buildEscalationBlocks,
+  buildFallbackText,
+  buildStartupBlocks,
+  buildDismissedBlocks,
+  buildConfirmationBlocks,
+  formatActionLabel,
+} from './blocks.js';
 import {
   registerActionHandler,
   registerMessageHandler,
@@ -56,6 +63,9 @@ export class SlackAdapter implements MessagingAdapter {
   private readonly escalationToTs = new Map<string, string>();
   private readonly tsToEscalation = new Map<string, string>();
 
+  /** Original Block Kit blocks keyed by escalation ID (for dismiss updates). */
+  private readonly escalationBlocks = new Map<string, import('@slack/types').KnownBlock[]>();
+
   /** Pending Promise resolvers keyed by escalation ID. */
   private readonly responseResolvers = new Map<string, (response: UserResponse) => void>();
 
@@ -85,8 +95,8 @@ export class SlackAdapter implements MessagingAdapter {
       onAction: (escalationId: string, actionValue: string, userId: string): void => {
         this.handleAction(escalationId, actionValue, userId);
       },
-      onThreadReply: (threadTs: string, text: string): void => {
-        this.handleThreadReply(threadTs, text);
+      onThreadReply: (threadTs: string, text: string, userId: string): void => {
+        this.handleThreadReply(threadTs, text, userId);
       },
       onReaction: (channelId: string, messageTs: string, emoji: string, userId: string): void => {
         this.handleReaction(channelId, messageTs, emoji, userId);
@@ -134,13 +144,30 @@ export class SlackAdapter implements MessagingAdapter {
       resolver({ type: 'action', actionId: actionValue, respondedAt: new Date() });
     }
 
-    // Clean up maps
-    const ts = this.escalationToTs.get(escalationId);
-    if (ts) {
-      this.tsToEscalation.delete(ts);
-    }
-    this.escalationToTs.delete(escalationId);
+    // Clean up heavy maps (keep escalationToTs/tsToEscalation for PostToolUse follow-ups)
+    this.escalationBlocks.delete(escalationId);
     this.responseResolvers.delete(escalationId);
+  }
+
+  /**
+   * Fire-and-forget Slack message update: strip action buttons and append
+   * confirmation blocks so resolved escalations no longer show clickable buttons.
+   */
+  private updateResolvedMessage(
+    ts: string,
+    originalBlocks: KnownBlock[],
+    confirmationBlocks: KnownBlock[],
+    fallbackText: string,
+  ): void {
+    const blocksWithoutActions = originalBlocks.filter((b) => b.type !== 'actions');
+    void this.app.client.chat.update({
+      channel: this.channelId,
+      ts,
+      blocks: [...blocksWithoutActions, ...confirmationBlocks],
+      text: fallbackText,
+    }).catch((err: unknown) => {
+      console.error('[escalate] Failed to update resolved message:', err);
+    });
   }
 
   /**
@@ -149,9 +176,12 @@ export class SlackAdapter implements MessagingAdapter {
    * Looks up the escalation by thread timestamp, resolves it in the store,
    * calls the pending Promise resolver, and cleans up tracking maps.
    */
-  private handleThreadReply(threadTs: string, text: string): void {
+  private handleThreadReply(threadTs: string, text: string, userId: string): void {
     const escalationId = this.tsToEscalation.get(threadTs);
     if (!escalationId) return; // Not a tracked thread
+
+    // Capture message metadata BEFORE cleanup
+    const originalBlocks = this.escalationBlocks.get(escalationId) ?? [];
 
     const resolved = this.store.resolve(escalationId, JSON.stringify({ type: 'text', text }));
 
@@ -162,9 +192,15 @@ export class SlackAdapter implements MessagingAdapter {
       resolver({ type: 'text', text, respondedAt: new Date() });
     }
 
-    // Clean up maps
-    this.escalationToTs.delete(escalationId);
-    this.tsToEscalation.delete(threadTs);
+    // Update Slack message to remove action buttons
+    const confirmation = buildConfirmationBlocks(
+      'Replied in thread',
+      userId,
+    );
+    this.updateResolvedMessage(threadTs, originalBlocks, confirmation, 'Replied in thread');
+
+    // Clean up heavy maps (keep escalationToTs/tsToEscalation for PostToolUse follow-ups)
+    this.escalationBlocks.delete(escalationId);
     this.responseResolvers.delete(escalationId);
   }
 
@@ -179,7 +215,7 @@ export class SlackAdapter implements MessagingAdapter {
     channelId: string,
     messageTs: string,
     emoji: string,
-    _userId: string,
+    userId: string,
   ): void {
     // Only handle reactions in our channel
     if (channelId !== this.channelId) return;
@@ -192,12 +228,16 @@ export class SlackAdapter implements MessagingAdapter {
     const decision = this.emojiMapping.get(emoji);
     if (!decision) return; // Unrecognized emoji, silently ignore
 
+    // Capture message metadata BEFORE cleanup
+    const ts = this.escalationToTs.get(escalationId);
+    const originalBlocks = this.escalationBlocks.get(escalationId) ?? [];
+
     // Resolve in store (idempotent, returns false if already resolved)
     const resolved = this.store.resolve(
       escalationId,
       JSON.stringify({ type: 'reaction', emoji, actionId: decision }),
     );
-    if (!resolved) return;
+    if (!resolved) return; // Already resolved
 
     // Call pending Promise resolver
     const resolver = this.responseResolvers.get(escalationId);
@@ -205,12 +245,15 @@ export class SlackAdapter implements MessagingAdapter {
       resolver({ type: 'reaction', emoji, actionId: decision, respondedAt: new Date() });
     }
 
-    // Clean up maps
-    const ts = this.escalationToTs.get(escalationId);
+    // Update Slack message to remove action buttons
+    const label = formatActionLabel(decision);
+    const confirmation = buildConfirmationBlocks(label, userId);
     if (ts) {
-      this.tsToEscalation.delete(ts);
+      this.updateResolvedMessage(ts, originalBlocks, confirmation, `Action taken: ${label}`);
     }
-    this.escalationToTs.delete(escalationId);
+
+    // Clean up heavy maps (keep escalationToTs/tsToEscalation for PostToolUse follow-ups)
+    this.escalationBlocks.delete(escalationId);
     this.responseResolvers.delete(escalationId);
   }
 
@@ -275,6 +318,10 @@ export class SlackAdapter implements MessagingAdapter {
         throw new Error('Transcription returned empty text');
       }
 
+      // Capture message metadata BEFORE cleanup
+      const ts = this.escalationToTs.get(escalationId);
+      const originalBlocks = this.escalationBlocks.get(escalationId) ?? [];
+
       // Resolve in store
       const resolved = this.store.resolve(
         escalationId,
@@ -288,12 +335,14 @@ export class SlackAdapter implements MessagingAdapter {
         resolver({ type: 'text', text: result.text, respondedAt: new Date() });
       }
 
-      // Clean up maps
-      const ts = this.escalationToTs.get(escalationId);
+      // Update Slack message to remove action buttons
+      const confirmation = buildConfirmationBlocks('Voice note', '');
       if (ts) {
-        this.tsToEscalation.delete(ts);
+        this.updateResolvedMessage(ts, originalBlocks, confirmation, 'Voice note');
       }
-      this.escalationToTs.delete(escalationId);
+
+      // Clean up heavy maps (keep escalationToTs/tsToEscalation for PostToolUse follow-ups)
+      this.escalationBlocks.delete(escalationId);
       this.responseResolvers.delete(escalationId);
     } catch (err: unknown) {
       console.error('[escalate] Transcription failed:', err);
@@ -352,10 +401,11 @@ export class SlackAdapter implements MessagingAdapter {
       `[escalate] Authenticated as ${String(result.user)} in workspace ${String(result.team)}`,
     );
 
-    // Post startup announcement
+    // Post startup announcement with Block Kit
     const postResult = await this.app.client.chat.postMessage({
       channel: this.channelId,
-      text: ':zap: Escalate online -- ready to receive escalations',
+      blocks: buildStartupBlocks(),
+      text: 'Escalate is online and monitoring this channel',
     });
     if (!postResult.ok) {
       throw new Error(
@@ -404,9 +454,10 @@ export class SlackAdapter implements MessagingAdapter {
       throw new Error('Slack chat.postMessage did not return a message timestamp');
     }
 
-    // Store bidirectional mapping
+    // Store bidirectional mapping and original blocks for dismiss updates
     this.escalationToTs.set(escalationId, ts);
     this.tsToEscalation.set(ts, escalationId);
+    this.escalationBlocks.set(escalationId, blocks);
 
     return escalationId;
   }
@@ -448,6 +499,37 @@ export class SlackAdapter implements MessagingAdapter {
       thread_ts: ts,
       text: message,
     });
+  }
+
+  /**
+   * Update a Slack escalation message when resolved outside of Slack.
+   *
+   * Replaces the action buttons with a status indicator (e.g. "Resolved from CLI",
+   * "Timed out") while preserving the original message context (header, tool info,
+   * question). Cleans up all tracking maps for this escalation.
+   */
+  async dismissEscalation(escalationId: string, source: string): Promise<void> {
+    const ts = this.escalationToTs.get(escalationId);
+    if (!ts) return; // Not tracked or already cleaned up
+
+    // Get original blocks and remove the actions row
+    const originalBlocks = this.escalationBlocks.get(escalationId) ?? [];
+    const blocksWithoutActions = originalBlocks.filter((b) => b.type !== 'actions');
+
+    // Append resolution indicator
+    const dismissSource = source === 'timeout' ? 'timeout' : source === 'auto_approved' ? 'auto_approved' : 'cli';
+    const dismissBlocks = buildDismissedBlocks(dismissSource);
+
+    await this.app.client.chat.update({
+      channel: this.channelId,
+      ts,
+      blocks: [...blocksWithoutActions, ...dismissBlocks],
+      text: dismissSource === 'cli' ? 'Resolved from CLI' : dismissSource === 'timeout' ? 'Timed out' : 'Auto-approved',
+    });
+
+    // Clean up heavy maps (keep escalationToTs/tsToEscalation for PostToolUse follow-ups)
+    this.escalationBlocks.delete(escalationId);
+    this.responseResolvers.delete(escalationId);
   }
 
   /**

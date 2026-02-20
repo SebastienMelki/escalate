@@ -53,8 +53,14 @@ Create a Slack app with these permissions:
 
 **Bot Token Scopes:**
 - `chat:write` - Send messages
+- `channels:history` - Receive thread replies in public channels
+- `groups:history` - Receive thread replies in private channels (if using a private channel)
 - `reactions:read` - Read emoji reactions
 - `files:read` - Download voice note attachments
+
+**Event Subscriptions** (under "Subscribe to bot events"):
+- `message.channels` - Thread replies in public channels
+- `message.groups` - Thread replies in private channels (if using a private channel)
 
 **Socket Mode:** Enable Socket Mode and generate an app-level token with `connections:write` scope.
 

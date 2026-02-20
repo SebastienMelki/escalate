@@ -14,6 +14,7 @@ export {
   EventEscalationConfigSchema,
   FallbackActionSchema,
   FallbackActionsConfigSchema,
+  TriageConfigSchema,
 } from './schema.js';
 export type { EscalateConfig } from './schema.js';
 
@@ -29,4 +30,5 @@ export {
   DEFAULT_EMOJI_MAPPING,
   DEFAULT_VOICE_NOTES,
   DEFAULT_MULTIMODAL,
+  DEFAULT_TRIAGE,
 } from './defaults.js';

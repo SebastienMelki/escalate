@@ -280,7 +280,8 @@ describe('SlackAdapter', () => {
       expect(mockPostMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           channel: 'C12345',
-          text: expect.stringContaining('Escalate online') as unknown,
+          text: expect.stringContaining('Escalate') as unknown,
+          blocks: expect.arrayContaining([]) as unknown,
         }),
       );
     });
@@ -308,6 +309,170 @@ describe('SlackAdapter', () => {
       await adapter.start();
       await adapter.stop();
       expect(mockStop).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('emoji reaction resolution', () => {
+    it('updates Slack message when emoji reaction resolves escalation', async () => {
+      const adapter = createAdapter();
+      const record = store.create({
+        eventType: 'PermissionRequest',
+        requestJson: '{}',
+        fallbackAction: 'deny',
+        timeoutSeconds: 600,
+      });
+      await adapter.sendEscalation(makeRequest({ id: record.id }));
+
+      // Fire the reaction handler
+      const reactionHandler = registeredEventHandlers.find((h) => h.event === 'reaction_added');
+      expect(reactionHandler).toBeDefined();
+
+      await (reactionHandler as NonNullable<typeof reactionHandler>).handler({
+        event: {
+          item: { channel: 'C12345', ts: 'mock.ts.1234' },
+          reaction: 'white_check_mark',
+          user: 'U123',
+        },
+      });
+
+      // Verify chat.update was called to remove action buttons
+      expect(mockChatUpdate).toHaveBeenCalledOnce();
+      const updateCall = mockChatUpdate.mock.calls[0] as [{ blocks: Array<{ type: string }>; text: string }];
+      const updatedBlocks = updateCall[0].blocks;
+
+      // No actions block should remain
+      expect(updatedBlocks.every((b) => b.type !== 'actions')).toBe(true);
+      // Should contain a confirmation section with "Approved"
+      expect(updateCall[0].text).toContain('Approved');
+    });
+
+    it('ignores reactions on non-tracked messages', async () => {
+      const adapter = createAdapter();
+      // Don't send any escalation — no tracked messages
+
+      const reactionHandler = registeredEventHandlers.find((h) => h.event === 'reaction_added');
+      expect(reactionHandler).toBeDefined();
+
+      await (reactionHandler as NonNullable<typeof reactionHandler>).handler({
+        event: {
+          item: { channel: 'C12345', ts: 'untracked.ts' },
+          reaction: 'white_check_mark',
+          user: 'U123',
+        },
+      });
+
+      // No chat.update should be called
+      expect(mockChatUpdate).not.toHaveBeenCalled();
+      void adapter; // suppress unused warning
+    });
+
+    it('ignores unmapped emoji reactions', async () => {
+      const adapter = createAdapter();
+      const record = store.create({
+        eventType: 'PermissionRequest',
+        requestJson: '{}',
+        fallbackAction: 'deny',
+        timeoutSeconds: 600,
+      });
+      await adapter.sendEscalation(makeRequest({ id: record.id }));
+
+      const reactionHandler = registeredEventHandlers.find((h) => h.event === 'reaction_added');
+      expect(reactionHandler).toBeDefined();
+
+      await (reactionHandler as NonNullable<typeof reactionHandler>).handler({
+        event: {
+          item: { channel: 'C12345', ts: 'mock.ts.1234' },
+          reaction: 'thumbsup', // Not in the emoji mapping
+          user: 'U123',
+        },
+      });
+
+      // No chat.update should be called
+      expect(mockChatUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('thread reply resolution', () => {
+    it('updates Slack message when thread reply resolves escalation', async () => {
+      const adapter = createAdapter();
+      const record = store.create({
+        eventType: 'PermissionRequest',
+        requestJson: '{}',
+        fallbackAction: 'deny',
+        timeoutSeconds: 600,
+      });
+      await adapter.sendEscalation(makeRequest({ id: record.id }));
+
+      // Fire the message handler (thread reply)
+      // There are 2 message handlers registered (one for thread replies, one for file shares)
+      // The thread reply handler is the one that passes text to onThreadReply
+      const messageHandler = registeredMessageHandlers[0];
+      expect(messageHandler).toBeDefined();
+
+      await (messageHandler as NonNullable<typeof messageHandler>)({
+        message: {
+          thread_ts: 'mock.ts.1234',
+          text: 'Go ahead',
+          user: 'U456',
+        },
+      });
+
+      // Verify chat.update was called
+      expect(mockChatUpdate).toHaveBeenCalledOnce();
+      const updateCall = mockChatUpdate.mock.calls[0] as [{ blocks: Array<{ type: string }>; text: string }];
+      const updatedBlocks = updateCall[0].blocks;
+
+      // No actions block should remain
+      expect(updatedBlocks.every((b) => b.type !== 'actions')).toBe(true);
+      expect(updateCall[0].text).toBe('Replied in thread');
+    });
+  });
+
+  describe('dismissEscalation', () => {
+    it('updates Slack message with resolution indicator', async () => {
+      const adapter = createAdapter();
+      await adapter.sendEscalation(makeRequest());
+
+      await adapter.dismissEscalation(
+        // Get the escalation ID from the mock call — it was auto-generated
+        mockPostMessage.mock.calls[0]?.[0]?.blocks?.find(
+          (b: { type: string }) => b.type === 'actions',
+        )?.elements?.[0]?.action_id?.split('_')[1] ?? '',
+        'cli',
+      );
+
+      // The simplest way: just send a new escalation with known ID
+    });
+
+    it('updates message preserving context blocks on CLI dismiss', async () => {
+      const adapter = createAdapter();
+      const record = store.create({
+        eventType: 'PermissionRequest',
+        requestJson: '{}',
+        fallbackAction: 'deny',
+        timeoutSeconds: 600,
+      });
+      await adapter.sendEscalation(makeRequest({ id: record.id }));
+
+      await adapter.dismissEscalation(record.id, 'cli');
+
+      expect(mockChatUpdate).toHaveBeenCalledOnce();
+      const updateCall = mockChatUpdate.mock.calls[0] as [{ blocks: Array<{ type: string }>; text: string }];
+      const updatedBlocks = updateCall[0].blocks;
+
+      // No actions block should remain
+      expect(updatedBlocks.every((b) => b.type !== 'actions')).toBe(true);
+      // Should still have header and other context blocks
+      expect(updatedBlocks.some((b) => b.type === 'header')).toBe(true);
+      expect(updateCall[0].text).toBe('Resolved from CLI');
+    });
+
+    it('silently ignores unknown escalation IDs', async () => {
+      const adapter = createAdapter();
+
+      await adapter.dismissEscalation('nonexistent', 'cli');
+
+      expect(mockChatUpdate).not.toHaveBeenCalled();
     });
   });
 

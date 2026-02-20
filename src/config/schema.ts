@@ -13,6 +13,7 @@ import {
   DEFAULT_EMOJI_MAPPING,
   DEFAULT_VOICE_NOTES,
   DEFAULT_MULTIMODAL,
+  DEFAULT_TRIAGE,
 } from './defaults.js';
 
 /** Urgency level for escalation classification. */
@@ -100,6 +101,14 @@ export const MultimodalConfigSchema = z.object({
   voiceNotes: VoiceNoteConfigSchema.default({ ...DEFAULT_VOICE_NOTES }),
 });
 
+/** Triage configuration schema for LLM-powered Stop event classification. */
+export const TriageConfigSchema = z.object({
+  enabled: z.boolean().default(true),
+  method: z.enum(['auto', 'llm', 'heuristic']).default('auto'),
+  model: z.string().default('claude-haiku-4-5-20251001'),
+  confidenceThreshold: z.enum(['high', 'medium', 'low']).default('low'),
+});
+
 /** Audit log configuration schema. */
 export const AuditLogSchema = z.object({
   enabled: z.boolean().default(true),
@@ -119,6 +128,7 @@ export const EscalateConfigSchema = z.object({
     criticalEvents: [...DEFAULT_QUIET_HOURS.criticalEvents],
   }),
   multimodal: MultimodalConfigSchema.default({ ...DEFAULT_MULTIMODAL }),
+  triage: TriageConfigSchema.default({ ...DEFAULT_TRIAGE }),
   auditLog: AuditLogSchema.default({ enabled: true }),
 });
 

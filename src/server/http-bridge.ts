@@ -34,6 +34,8 @@ import type { EscalationRequest, SuggestedAction } from '../types/escalation.js'
 import { evaluateRules, extractFilePaths } from '../intelligence/rules.js';
 import { isQuietHours, isCriticalEvent } from '../intelligence/quiet-hours.js';
 import { appendAuditEntry } from '../intelligence/audit.js';
+import { triageStopEvent } from '../intelligence/triage.js';
+import type { TriageResult } from '../intelligence/triage.js';
 import { buildSessionSummary, buildSummaryBlocks } from '../intelligence/summary.js';
 import { loadConfig } from '../config/index.js';
 import { isOk } from '../errors/result.js';
@@ -47,29 +49,141 @@ export interface HttpBridgeOptions {
 }
 
 /**
+ * Human-readable title for each event type.
+ */
+function buildTitleForEvent(eventType: string, toolName?: string): string {
+  if (toolName === 'AskUserQuestion') return 'Question from Claude';
+  const titles: Record<string, string> = {
+    PermissionRequest: 'Permission Required',
+    PreToolUse: 'Tool Approval Needed',
+    Stop: 'Stop Requested',
+    PostToolUseFailure: 'Tool Failure',
+  };
+  return titles[eventType] ?? eventType;
+}
+
+/**
+ * Format tool input into a readable string based on the tool type.
+ *
+ * Understands common Claude Code tools (Bash, Write, Edit, Read) and
+ * renders their inputs in human-friendly format instead of raw JSON.
+ */
+function formatToolInput(toolName: string, rawInput: unknown): string {
+  const input =
+    typeof rawInput === 'object' && rawInput !== null
+      ? (rawInput as Record<string, unknown>)
+      : {};
+
+  // Extract the base tool name (handles MCP-prefixed names)
+  const baseTool = (toolName.includes('__') ? toolName.split('__').pop() : toolName) ?? toolName;
+
+  switch (baseTool) {
+    case 'Bash': {
+      const cmd = input['command'];
+      if (typeof cmd === 'string') {
+        return '```\n' + cmd.slice(0, 500) + '\n```';
+      }
+      break;
+    }
+    case 'Write': {
+      const path = input['file_path'];
+      const content = input['content'];
+      const lines = typeof content === 'string' ? content.split('\n').length : 0;
+      if (typeof path === 'string') {
+        return `Write to \`${path}\`` + (lines > 0 ? ` (${String(lines)} lines)` : '');
+      }
+      break;
+    }
+    case 'Edit': {
+      const path = input['file_path'];
+      if (typeof path === 'string') {
+        return `Edit \`${path}\``;
+      }
+      break;
+    }
+    case 'Read': {
+      const path = input['file_path'];
+      if (typeof path === 'string') {
+        return `Read \`${path}\``;
+      }
+      break;
+    }
+  }
+
+  // Fallback: truncated JSON
+  const json = JSON.stringify(input);
+  return json.length > 300 ? json.slice(0, 300) + '...' : json;
+}
+
+/**
  * Build a human-readable question from a hook event type and input data.
  *
  * Each event type produces a contextual question that makes sense in Slack.
+ * Tool inputs are formatted based on the tool type for readability.
  */
 function buildQuestionFromEvent(eventType: string, input: Record<string, unknown>): string {
   const rawToolName = input['tool_name'];
   const toolName = typeof rawToolName === 'string' ? rawToolName : 'Unknown';
-  const toolInput = JSON.stringify(input['tool_input'] ?? {}).slice(0, 200);
   const lastMessage = input['last_assistant_message'];
   const error = input['error'];
 
+  // AskUserQuestion: render the actual question and numbered options
+  if (toolName === 'AskUserQuestion') {
+    return formatAskUserQuestion(input['tool_input']);
+  }
+
   switch (eventType) {
     case 'PermissionRequest':
-      return `Allow ${toolName}? ${toolInput}`;
     case 'PreToolUse':
-      return `Allow ${toolName} before execution? ${toolInput}`;
+      return formatToolInput(toolName, input['tool_input']);
     case 'Stop':
-      return `Claude wants to stop. ${typeof lastMessage === 'string' ? lastMessage.slice(0, 200) : 'No context.'}`;
+      return typeof lastMessage === 'string'
+        ? `> ${lastMessage.slice(0, 300)}`
+        : '_No context available_';
     case 'PostToolUseFailure':
-      return `Tool failure: ${toolName} — ${typeof error === 'string' ? error.slice(0, 200) : 'Unknown error'}`;
+      return typeof error === 'string'
+        ? '```\n' + error.slice(0, 300) + '\n```'
+        : '_Unknown error_';
     default:
       return `Event: ${eventType}`;
   }
+}
+
+/**
+ * Format an AskUserQuestion tool_input into a readable Slack message.
+ *
+ * Renders the question text followed by numbered options with descriptions,
+ * and a hint to reply in thread for a custom answer.
+ */
+function formatAskUserQuestion(rawInput: unknown): string {
+  const input =
+    typeof rawInput === 'object' && rawInput !== null
+      ? (rawInput as Record<string, unknown>)
+      : {};
+
+  const questions = input['questions'];
+  if (!Array.isArray(questions) || questions.length === 0) {
+    return '_No question provided_';
+  }
+
+  const q = questions[0] as Record<string, unknown>;
+  const questionText = typeof q['question'] === 'string' ? q['question'] : 'Question';
+  const options = Array.isArray(q['options']) ? (q['options'] as Array<Record<string, unknown>>) : [];
+
+  const lines: string[] = [`*${questionText}*`];
+  if (options.length > 0) {
+    lines.push('');
+    for (let i = 0; i < options.length; i++) {
+      const opt = options[i] as Record<string, unknown>;
+      const label = typeof opt['label'] === 'string' ? opt['label'] : `Option ${String(i + 1)}`;
+      const desc = typeof opt['description'] === 'string' ? opt['description'] : '';
+      lines.push(`${String(i + 1)}. *${label}*${desc ? ` — ${desc}` : ''}`);
+    }
+  }
+  lines.push('');
+  lines.push('_Reply in thread for a custom answer_');
+
+  return lines.join('\n');
 }
 
 /**
@@ -77,7 +191,26 @@ function buildQuestionFromEvent(eventType: string, input: Record<string, unknown
  *
  * Returns a set of buttons that make sense for the user to click in Slack.
  */
-function buildActionsForEvent(eventType: string): SuggestedAction[] {
+function buildActionsForEvent(eventType: string, hookInput?: Record<string, unknown>): SuggestedAction[] {
+  // AskUserQuestion: one button per option
+  if (hookInput && hookInput['tool_name'] === 'AskUserQuestion') {
+    const rawToolInput = hookInput['tool_input'];
+    const toolInput =
+      typeof rawToolInput === 'object' && rawToolInput !== null
+        ? (rawToolInput as Record<string, unknown>)
+        : {};
+    const questions = toolInput['questions'];
+    if (Array.isArray(questions) && questions.length > 0) {
+      const q = questions[0] as Record<string, unknown>;
+      const options = Array.isArray(q['options']) ? (q['options'] as Array<Record<string, unknown>>) : [];
+      return options.map((opt, i) => ({
+        id: `option_${String(i)}`,
+        label: (typeof opt['label'] === 'string' ? opt['label'] : `Option ${String(i + 1)}`).slice(0, 75),
+        ...(i === 0 ? { style: 'primary' as const } : {}),
+      }));
+    }
+  }
+
   switch (eventType) {
     case 'PermissionRequest':
     case 'PreToolUse':
@@ -198,6 +331,7 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
         let decision: 'escalate' | 'auto_approve' | 'quiet_hours_suppress' = 'escalate';
         let reason = 'No config available, defaulting to escalate';
         let matchedRuleDescription: string | undefined;
+        let triageResult: TriageResult | undefined;
 
         if (config) {
           // Get escalation policy for event type (bracket notation for noPropertyAccessFromIndexSignature)
@@ -218,6 +352,17 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
           decision = ruleResult.decision;
           reason = ruleResult.reason;
           matchedRuleDescription = ruleResult.matchedRule?.description;
+
+          // Triage Stop events: use LLM/heuristic to filter out completions
+          if (decision === 'escalate' && event_type === 'Stop') {
+            const lastMessage = hookInput['last_assistant_message'];
+            const messageText = typeof lastMessage === 'string' ? lastMessage : '';
+            triageResult = await triageStopEvent(messageText, config.triage);
+            if (!triageResult.needsHumanInput) {
+              decision = 'auto_approve';
+              reason = `Triage: ${triageResult.reason} (${triageResult.method})`;
+            }
+          }
 
           // Check quiet hours for non-critical events that would be escalated
           if (
@@ -242,6 +387,11 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
               ...(toolName !== undefined ? { toolName } : {}),
               ...(filePaths.length > 0 ? { filePaths } : {}),
               ...(matchedRuleDescription !== undefined ? { matchedRule: matchedRuleDescription } : {}),
+              ...(triageResult !== undefined ? {
+                triageMethod: triageResult.method,
+                triageConfidence: triageResult.confidence,
+                triageNeedsHumanInput: triageResult.needsHumanInput,
+              } : {}),
             });
           } catch (auditErr: unknown) {
             console.error('[escalate] Audit log write failed (non-blocking):', auditErr);
@@ -296,13 +446,14 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
             ...(typeof toolName === 'string' ? { toolName } : {}),
             ...(filePaths.length > 0 ? { filePaths } : {}),
           };
+          const isAskUser = toolName === 'AskUserQuestion';
           const escalationRequest: EscalationRequest = {
             id: record.id,
-            title: `${event_type}: ${toolName ?? 'Unknown'}`,
+            title: buildTitleForEvent(event_type, toolName),
             question: buildQuestionFromEvent(event_type, hookInput),
-            urgency: event_type === 'PostToolUseFailure' ? 'warning' : 'critical',
+            urgency: isAskUser ? 'info' : event_type === 'PostToolUseFailure' ? 'warning' : 'critical',
             context,
-            suggestedActions: buildActionsForEvent(event_type),
+            suggestedActions: buildActionsForEvent(event_type, hookInput),
             allowFreeformResponse: true,
           };
           void adapter.sendEscalation(escalationRequest).catch((err: unknown) => {
@@ -314,6 +465,75 @@ export function createHttpBridge(options: HttpBridgeOptions): Server {
           escalation_id: record.id,
           status: record.status,
         });
+        return;
+      }
+
+      // POST /escalations/:id/result — post tool output to escalation thread
+      if (
+        req.method === 'POST' &&
+        pathParts[0] === 'escalations' &&
+        pathParts[1] &&
+        pathParts[2] === 'result'
+      ) {
+        const id = pathParts[1];
+        let body: unknown;
+        try {
+          body = await parseJsonBody(req);
+        } catch {
+          sendJson(res, 400, { error: 'Invalid JSON body' });
+          return;
+        }
+
+        const output = (body as { output?: string } | undefined)?.output ?? '';
+
+        const adapter = options.adapter;
+        if (adapter?.isConnected()) {
+          const truncated = output.length > 2500 ? output.slice(0, 2500) + '\n… (truncated)' : output;
+          const message = `:computer: *Output:*\n\`\`\`\n${truncated}\n\`\`\``;
+          try {
+            await adapter.sendFollowUp(id, message);
+          } catch (err: unknown) {
+            console.error('[escalate] Failed to post result follow-up:', err);
+          }
+        }
+
+        sendJson(res, 200, { status: 'posted' });
+        return;
+      }
+
+      // POST /escalations/:id/dismiss — update Slack message for CLI-resolved escalations
+      if (
+        req.method === 'POST' &&
+        pathParts[0] === 'escalations' &&
+        pathParts[1] &&
+        pathParts[2] === 'dismiss'
+      ) {
+        const id = pathParts[1];
+        let body: unknown;
+        try {
+          body = await parseJsonBody(req);
+        } catch {
+          sendJson(res, 400, { error: 'Invalid JSON body' });
+          return;
+        }
+
+        const source =
+          (body as { source?: string } | undefined)?.source ?? 'cli';
+
+        const adapter = options.adapter;
+        if (adapter?.isConnected() && 'dismissEscalation' in adapter) {
+          try {
+            await (
+              adapter as {
+                dismissEscalation: (id: string, source: string) => Promise<void>;
+              }
+            ).dismissEscalation(id, source);
+          } catch (err: unknown) {
+            console.error('[escalate] Failed to dismiss Slack escalation:', err);
+          }
+        }
+
+        sendJson(res, 200, { status: 'dismissed' });
         return;
       }
 

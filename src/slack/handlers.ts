@@ -6,12 +6,12 @@
  * and single-responsibility.
  */
 import type { App, BlockAction, ButtonAction } from '@slack/bolt';
-import { buildConfirmationBlocks } from './blocks.js';
+import { buildConfirmationBlocks, formatActionLabel } from './blocks.js';
 
 /** Callback interface for the SlackAdapter to receive Bolt events. */
 export interface SlackAdapterCallbacks {
   onAction(escalationId: string, actionValue: string, userId: string): void;
-  onThreadReply(threadTs: string, text: string): void;
+  onThreadReply(threadTs: string, text: string, userId: string): void;
   onReaction?(channelId: string, messageTs: string, emoji: string, userId: string): void;
   onFileShare?(
     threadTs: string,
@@ -52,16 +52,19 @@ export function registerActionHandler(app: App, adapter: SlackAdapterCallbacks):
 
     adapter.onAction(escalationId, actionValue, body.user.id);
 
-    // Replace original message with confirmation blocks
-    const confirmationBlocks = buildConfirmationBlocks(actionValue, body.user.id);
+    // Replace original message: keep all context blocks, remove actions, append confirmation
     const blocks = body.message?.['blocks'] as import('@slack/types').KnownBlock[] | undefined;
-    const originalHeader = blocks?.[0];
+    const blocksWithoutActions = (blocks ?? []).filter(
+      (b: import('@slack/types').KnownBlock) => b.type !== 'actions',
+    );
+    const label = formatActionLabel(actionValue);
+    const confirmationBlocks = buildConfirmationBlocks(label, body.user.id);
 
     await client.chat.update({
       channel: channelId,
       ts,
-      blocks: originalHeader ? [originalHeader, ...confirmationBlocks] : confirmationBlocks,
-      text: `Action taken: ${actionValue}`,
+      blocks: [...blocksWithoutActions, ...confirmationBlocks],
+      text: `Action taken: ${label}`,
     });
   });
 }
@@ -83,7 +86,8 @@ export function registerMessageHandler(app: App, adapter: SlackAdapterCallbacks)
     if ('subtype' in message && message.subtype === 'bot_message') return;
 
     const text = 'text' in message ? (message.text ?? '') : '';
-    adapter.onThreadReply(message.thread_ts, text);
+    const userId = 'user' in message ? (message.user as string ?? '') : '';
+    adapter.onThreadReply(message.thread_ts, text, userId);
 
     await Promise.resolve(); // Bolt requires async handler signature
   });

@@ -11,8 +11,8 @@ export const DEFAULT_TIMEOUTS = {
   permissionRequest: 600_000,
   /** How long to wait for a response to pre-tool-use checks (5 min). */
   preToolUse: 300_000,
-  /** How long to wait for a response to stop events (10 min). */
-  stop: 600_000,
+  /** How long to wait for a response to stop events (30 sec). */
+  stop: 30_000,
   /** How long to wait for a response to post-tool-use failures (1 min). */
   postToolUseFailure: 60_000,
 } as const;
@@ -23,7 +23,7 @@ export const DEFAULT_ESCALATION_POLICIES = {
   permissionRequest: 'always',
   /** Conditionally escalate pre-tool-use (based on urgency analysis). */
   preToolUse: 'conditional',
-  /** Always escalate stop events. */
+  /** Always escalate stop events (triage filters out completions). */
   stop: 'always',
   /** Always escalate post-tool-use failures. */
   postToolUseFailure: 'always',
@@ -33,7 +33,7 @@ export const DEFAULT_ESCALATION_POLICIES = {
 export const DEFAULT_FALLBACK_ACTIONS = {
   permissionRequest: 'deny',
   preToolUse: 'deny',
-  stop: 'ask-again',
+  stop: 'allow',
   postToolUseFailure: 'allow',
 } as const;
 
@@ -62,6 +62,14 @@ export const DEFAULT_VOICE_NOTES = {
   provider: 'whisper' as const,
   maxDurationSeconds: 120,
   maxFileSizeMb: 10,
+} as const;
+
+/** Default triage configuration for LLM-powered Stop event classification. */
+export const DEFAULT_TRIAGE = {
+  enabled: true,
+  method: 'auto' as const,
+  model: 'claude-haiku-4-5-20251001',
+  confidenceThreshold: 'low' as const,
 } as const;
 
 /** Default multimodal configuration (emoji reactions on, voice notes off). */

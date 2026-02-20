@@ -134,6 +134,75 @@ export function buildStopOutput(result: EscalationResult): string | null {
   return null;
 }
 
+/**
+ * Build PermissionRequest hook output for AskUserQuestion tool calls.
+ *
+ * Always denies the tool call, embedding the user's answer in the deny message.
+ * Claude reads the deny message, understands the answer, and continues without
+ * re-asking.
+ *
+ * Button clicks (option_N) are mapped back to the actual option label/description.
+ * Thread replies are passed through as freeform text.
+ */
+export function buildAskUserQuestionOutput(
+  result: EscalationResult,
+  toolInput: Record<string, unknown>,
+): string {
+  const response = parseResponse(result);
+  if (!response) {
+    return JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PermissionRequest',
+        decision: { behavior: 'deny', message: 'No answer received via Escalate' },
+      },
+    });
+  }
+
+  // Button click: option_N → look up actual option
+  if (
+    (response.type === 'action' || response.type === 'reaction') &&
+    typeof response.actionId === 'string' &&
+    response.actionId.startsWith('option_')
+  ) {
+    const idx = parseInt(response.actionId.split('_')[1] ?? '', 10);
+    const questions = (toolInput as Record<string, unknown>)['questions'];
+    const options = Array.isArray(questions)
+      ? ((questions[0] as Record<string, unknown> | undefined)?.['options'] as Array<Record<string, unknown>> | undefined)
+      : undefined;
+    const selected = Array.isArray(options) ? options[idx] : undefined;
+
+    const label = typeof selected?.['label'] === 'string' ? selected['label'] : response.actionId;
+    const desc = typeof selected?.['description'] === 'string' ? (selected['description'] as string) : undefined;
+    const answer = desc ? `${label} — ${desc}` : label;
+
+    return JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PermissionRequest',
+        decision: { behavior: 'deny', message: `User answered via Slack: ${answer}` },
+      },
+    });
+  }
+
+  // Thread reply (freeform text or voice)
+  const text = extractText(response);
+  if (text) {
+    return JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PermissionRequest',
+        decision: { behavior: 'deny', message: `User answered via Slack: ${text}` },
+      },
+    });
+  }
+
+  // Fallback
+  return JSON.stringify({
+    hookSpecificOutput: {
+      hookEventName: 'PermissionRequest',
+      decision: { behavior: 'deny', message: 'No answer received via Escalate' },
+    },
+  });
+}
+
 /** Build PostToolUseFailure hook output. Always returns notification JSON. */
 export function buildPostToolFailureOutput(): string {
   return JSON.stringify({

@@ -30,7 +30,20 @@
           {
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/dist/scripts/on-stop.js",
-            "timeout": 600
+            "timeout": 45
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/dist/scripts/on-post-tool-use.js",
+            "timeout": 10,
+            "async": true
           }
         ]
       }

@@ -7,7 +7,7 @@
  * CRITICAL: No console.log() -- only console.error() for debug logging.
  * Hook scripts own stdout for JSON output to Claude Code.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { loadConfig } from '../../src/config/loader.js';
 import { DEFAULT_TIMEOUTS } from '../../src/config/defaults.js';
@@ -121,6 +121,28 @@ export async function pollForResponse(
 }
 
 /**
+ * Dismiss an escalation's Slack message (update it to show resolved status).
+ *
+ * Called when the escalation is resolved outside Slack (e.g. from CLI or timeout).
+ * Best-effort: callers should catch errors.
+ */
+export async function dismissEscalation(
+  port: number,
+  escalationId: string,
+  source: string = 'cli',
+): Promise<void> {
+  await fetch(
+    `http://127.0.0.1:${String(port)}/escalations/${escalationId}/dismiss`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source }),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    },
+  );
+}
+
+/**
  * Request a session summary from the HTTP bridge.
  *
  * POSTs to /summary and returns the status. Best-effort -- callers should
@@ -134,4 +156,58 @@ export async function requestSummary(port: number): Promise<{ status: string }> 
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   return (await res.json()) as { status: string };
+}
+
+/** Path to the last-escalation-id handoff file. */
+function lastEscalationIdPath(): string {
+  const projectDir = process.env['CLAUDE_PROJECT_DIR'] ?? process.cwd();
+  return join(projectDir, '.claude', 'escalate-last-id');
+}
+
+/**
+ * Write an escalation ID to a temp file for PostToolUse handoff.
+ *
+ * The PreToolUse/PermissionRequest hook writes this after a successful
+ * resolution so the PostToolUse hook can pick it up.
+ */
+export function writeLastEscalationId(escalationId: string): void {
+  writeFileSync(lastEscalationIdPath(), escalationId, 'utf-8');
+}
+
+/**
+ * Read and delete the last escalation ID file.
+ *
+ * Returns the ID if the file exists, null otherwise. The file is deleted
+ * after reading to prevent stale IDs from being reused.
+ */
+export function readLastEscalationId(): string | null {
+  const filePath = lastEscalationIdPath();
+  try {
+    const id = readFileSync(filePath, 'utf-8').trim();
+    unlinkSync(filePath);
+    return id || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Post tool output to an escalation's Slack thread via the HTTP bridge.
+ *
+ * Best-effort: callers should catch errors.
+ */
+export async function postResult(
+  port: number,
+  escalationId: string,
+  output: string,
+): Promise<void> {
+  await fetch(
+    `http://127.0.0.1:${String(port)}/escalations/${escalationId}/result`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ output }),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    },
+  );
 }

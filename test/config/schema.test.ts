@@ -43,7 +43,7 @@ describe('EscalateConfigSchema', () => {
       // Defaults should be applied
       expect(result.data.timeouts.permissionRequest).toBe(600_000);
       expect(result.data.timeouts.preToolUse).toBe(300_000);
-      expect(result.data.timeouts.stop).toBe(600_000);
+      expect(result.data.timeouts.stop).toBe(30_000);
       expect(result.data.timeouts.postToolUseFailure).toBe(60_000);
 
       expect(result.data.escalationPolicies.permissionRequest).toBe('always');
@@ -148,5 +148,39 @@ describe('EscalateConfigSchema', () => {
     if (result.success) {
       expect(result.data).not.toHaveProperty('extraField');
     }
+  });
+
+  it('applies default triage config', () => {
+    const input = { slack: { channelId: 'C0123456789' } };
+    const result = EscalateConfigSchema.safeParse(input);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.triage.enabled).toBe(true);
+      expect(result.data.triage.method).toBe('auto');
+      expect(result.data.triage.model).toBe('claude-haiku-4-5-20251001');
+      expect(result.data.triage.confidenceThreshold).toBe('low');
+    }
+  });
+
+  it('allows overriding triage config', () => {
+    const input = {
+      slack: { channelId: 'C0123456789' },
+      triage: { enabled: false, method: 'heuristic' },
+    };
+    const result = EscalateConfigSchema.safeParse(input);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.triage.enabled).toBe(false);
+      expect(result.data.triage.method).toBe('heuristic');
+    }
+  });
+
+  it('rejects invalid triage method', () => {
+    const input = {
+      slack: { channelId: 'C0123456789' },
+      triage: { method: 'magic' },
+    };
+    const result = EscalateConfigSchema.safeParse(input);
+    expect(result.success).toBe(false);
   });
 });

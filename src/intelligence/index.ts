@@ -30,6 +30,14 @@ export {
 export type { AuditEntry } from './audit.js';
 
 export {
+  triageStopEvent,
+  triageWithHeuristic,
+  triageWithLlm,
+} from './triage.js';
+
+export type { TriageConfig, TriageResult } from './triage.js';
+
+export {
   buildSessionSummary,
   buildSummaryBlocks,
 } from './summary.js';

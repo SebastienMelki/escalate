@@ -10,7 +10,7 @@ export { SlackAdapter } from './adapter.js';
 export type { SlackAdapterOptions } from './adapter.js';
 
 // Block Kit builders
-export { buildEscalationBlocks, buildConfirmationBlocks, buildFallbackText } from './blocks.js';
+export { buildEscalationBlocks, buildConfirmationBlocks, buildFallbackText, formatActionLabel } from './blocks.js';
 
 // Internal types
 export type { EscalationMessage, ButtonStyle, SlackAdapterState } from './types.js';
