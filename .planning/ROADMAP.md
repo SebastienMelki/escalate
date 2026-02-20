@@ -238,11 +238,11 @@ Plans:
 2. `buildActionsForEvent()` includes a Snooze action for PermissionRequest and PreToolUse events, and output-helpers.ts handles the snooze response type
 3. `filePaths` extracted in http-bridge.ts are passed to `EscalationRequest.context` and render as "Files:" block in Slack messages
 4. hooks.json PreToolUse timeout (300s) has a 20s buffer over pollForResponse deadline (300s → hooks.json 320s) to prevent mid-poll kill
-   **Plans**: 0 plans
+   **Plans**: 1 plan
 
 Plans:
 
-(none yet)
+- [ ] 12-01-PLAN.md — Fix session summary async, add Snooze button, pass filePaths to context, bump PreToolUse timeout
 
 ## Progress
 
